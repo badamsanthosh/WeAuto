@@ -1,22 +1,30 @@
 """
 Configuration file for automated trading system
+WEEKLY TRADING STRATEGY - 2 trades per week (1 buy, 1 sell)
 """
 import os
 from dotenv import load_dotenv
 
 load_dotenv()
 
-# Trading Configuration
-TARGET_GAIN_PERCENT = 5.0  # Target intraday gain percentage
-MAX_POSITIONS = 2  # Maximum number of positions to hold
-MIN_VOLUME = 1000000  # Minimum daily volume (in dollars)
-MIN_PRICE = 5.0  # Minimum stock price
-MAX_PRICE = 500.0  # Maximum stock price
+# Trading Configuration - WEEKLY STRATEGY
+TRADING_TIMEFRAME = 'WEEKLY'  # WEEKLY trading strategy
+TARGET_GAIN_PERCENT_MIN = 5.0  # Minimum target weekly gain
+TARGET_GAIN_PERCENT_MAX = 10.0  # Maximum target weekly gain
+TARGET_GAIN_PERCENT = 7.5  # Default target weekly gain (midpoint)
+MAX_POSITIONS = 2  # Maximum number of positions to hold (1 buy + 1 sell per week)
+TRADES_PER_WEEK = 2  # Number of trades per week (1 buy, 1 sell)
+MIN_VOLUME = 100000  # Minimum daily volume (in dollars)
+MIN_PRICE = 0.5  # Minimum stock price
+MAX_PRICE = 50000.0  # Maximum stock price
 
-# Risk Management
-STOP_LOSS_PERCENT = 2.0  # Stop loss percentage
-TAKE_PROFIT_PERCENT = 5.0  # Take profit percentage
-MAX_POSITION_SIZE = 10000  # Maximum position size in dollars
+# Risk Management - WEEKLY TIMEFRAME
+STOP_LOSS_PERCENT = 3.0  # Stop loss percentage (wider for weekly trades)
+TAKE_PROFIT_PERCENT = 7.5  # Take profit percentage (5-10% range)
+TAKE_PROFIT_MIN = 5.0  # Minimum take profit (exit at 5% minimum)
+TAKE_PROFIT_MAX = 10.0  # Maximum take profit (target 10% max)
+MAX_POSITION_SIZE = 50000  # Maximum position size in dollars
+HOLDING_PERIOD_DAYS = 5  # Target holding period (1 week = 5 trading days)
 
 # Moomoo API Configuration
 MOOMOO_HOST = os.getenv('MOOMOO_HOST', '127.0.0.1')
@@ -34,9 +42,7 @@ DATA_CACHE_DIR = 'data_cache'
 # Stock Universe
 # Focus on liquid, high-volume stocks
 POPULAR_TICKERS = [
-    'AAPL', 'MSFT', 'GOOGL', 'AMZN', 'NVDA', 'META', 'TSLA', 'NFLX',
-    'AMD', 'INTC', 'CRM', 'ORCL', 'ADBE', 'PYPL', 'UBER', 'LYFT',
-    'SPY', 'QQQ', 'DIA', 'IWM',  # ETFs for market analysis
+    'AAPL', 'MSFT', 'GOOGL', 'AMZN', 'NVTS', 'AMTM', 'TALK'  # ETFs for market analysis
 ]
 
 # Moving Average Strategy Configuration (PRIMARY STRATEGY)

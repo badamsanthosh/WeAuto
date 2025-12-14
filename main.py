@@ -5,15 +5,22 @@ import sys
 import argparse
 from datetime import datetime, timedelta
 from trading_bot import TradingBot
+import config
 
 def main():
     """Main function to run the trading bot"""
     parser = argparse.ArgumentParser(description='Automated Trading Bot for US Stocks')
-    parser.add_argument('--mode', choices=['analyze', 'trade', 'monitor'], 
+    parser.add_argument('--mode', choices=['analyze', 'trade', 'monitor', 'backtest', 'test', 'forward-test', 'stress-test'], 
                        default='analyze',
-                       help='Operation mode: analyze (recommendations only), trade (execute trades), monitor (monitor positions)')
+                       help='Operation mode: analyze (recommendations only), trade (execute trades), monitor (monitor positions), backtest (backtest strategy), test (comprehensive test), forward-test (forward test), stress-test (stress test)')
     parser.add_argument('--auto-approve', action='store_true',
                        help='Auto-approve all trades (use with caution!)')
+    parser.add_argument('--tickers', nargs='+',
+                       help='List of tickers to analyze/test (space-separated)')
+    parser.add_argument('--start-date', type=str,
+                       help='Start date for backtesting (YYYY-MM-DD)')
+    parser.add_argument('--end-date', type=str,
+                       help='End date for backtesting (YYYY-MM-DD)')
     
     args = parser.parse_args()
     
@@ -28,10 +35,19 @@ def main():
         
         # Run based on mode
         if args.mode == 'analyze':
-            print("\nRunning in ENHANCED ANALYSIS mode (no trades will be executed)")
+            print("\n" + "=" * 80)
+            print("ENHANCED WEEKLY SWING TRADING ANALYSIS MODE")
+            print("=" * 80)
+            print("Strategy: 2 trades per week (1 buy, 1 sell)")
+            print(f"Profit Target: {config.TARGET_GAIN_PERCENT_MIN}% - {config.TARGET_GAIN_PERCENT_MAX}%")
+            print(f"Holding Period: {config.HOLDING_PERIOD_DAYS} trading days")
+            print("No trades will be executed in this mode\n")
+            print("=" * 80)
+            
             from enhanced_analyzer import EnhancedAnalyzer
             enhanced = EnhancedAnalyzer()
-            results = enhanced.run_enhanced_analysis()
+            # Use new profitable discovery logic
+            results = enhanced.run_enhanced_analysis(use_profitable_discovery=True)
             enhanced.display_results(results)
             
         elif args.mode == 'backtest':
@@ -95,11 +111,20 @@ def main():
                         print(f"  {scenario}: {result['total_return_pct']:.2f}% return, {result['win_rate']:.2f}% win rate")
             
         elif args.mode == 'trade':
-            print("\nRunning in TRADE mode")
+            print("\n" + "=" * 80)
+            print("WEEKLY SWING TRADING MODE")
+            print("=" * 80)
+            print("Strategy: 2 trades per week (1 buy, 1 sell)")
+            print(f"Profit Target: {config.TARGET_GAIN_PERCENT_MIN}% - {config.TARGET_GAIN_PERCENT_MAX}%")
+            print(f"Holding Period: {config.HOLDING_PERIOD_DAYS} trading days")
+            print(f"Stop Loss: {config.STOP_LOSS_PERCENT}%")
+            print("=" * 80)
+            
             if args.auto_approve:
-                print("⚠️  WARNING: Auto-approve is enabled. All trades will be executed automatically!")
-                import config
+                print("\n⚠️  WARNING: Auto-approve is enabled. All trades will be executed automatically!")
                 config.REQUIRE_APPROVAL = False
+            else:
+                print("\n✅ Manual approval required for each trade")
             
             bot.run_daily_analysis()
             

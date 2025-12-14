@@ -1,6 +1,7 @@
 """
 Stock Prediction Engine using Machine Learning
-Predicts stocks with high probability of 5% intraday gains
+Predicts stocks with high probability of 5-10% WEEKLY gains
+UPDATED FOR WEEKLY SWING TRADING STRATEGY
 """
 import pandas as pd
 import numpy as np
@@ -17,7 +18,7 @@ from ma_strategy import MAStrategy
 import config
 
 class StockPredictor:
-    """ML-based stock predictor for intraday gains"""
+    """ML-based stock predictor for WEEKLY swing trading gains (5-10%)"""
     
     def __init__(self, model_type: str = 'xgboost'):
         self.model_type = model_type
@@ -26,18 +27,20 @@ class StockPredictor:
         self.data_analyzer = DataAnalyzer()
         self.ma_strategy = MAStrategy()
         self.feature_importance = None
+        self.use_weekly = True  # Use weekly targets by default
         
-    def prepare_features(self, data: pd.DataFrame) -> Tuple[pd.DataFrame, pd.Series]:
+    def prepare_features(self, data: pd.DataFrame, weekly: bool = True) -> Tuple[pd.DataFrame, pd.Series]:
         """
-        Prepare features and target for ML model
+        Prepare features and target for ML model (WEEKLY SWING TRADING)
         
         Args:
-            data: DataFrame with technical indicators
+            data: DataFrame with technical indicators (including weekly metrics)
+            weekly: Use weekly target (True) or intraday (False)
             
         Returns:
             Tuple of (features, target)
         """
-        # Select features - PRIORITIZE 50/250 MA STRATEGY FEATURES
+        # Select features - PRIORITIZE WEEKLY SWING TRADING FEATURES
         feature_cols = [
             # PRIMARY: Moving Average Strategy Features
             'SMA_50', 'SMA_250',  # Core MAs
@@ -48,6 +51,14 @@ class StockPredictor:
             'MA50_Slope', 'MA250_Slope',  # Momentum
             'MA_Crossover_Recent',  # Recent crossover
             'MA_Trend_Strength',  # Combined strength score
+            # WEEKLY SWING TRADING FEATURES (NEW)
+            'Weekly_Gain',  # Weekly forward returns
+            'Weekly_Momentum',  # Weekly momentum
+            'Weekly_RSI',  # Weekly RSI
+            'Weekly_Volatility',  # Weekly volatility
+            'Weekly_Range',  # Weekly high-low range
+            'Weekly_Volume_Trend',  # Weekly volume trend
+            'Swing_Strength',  # Swing trading strength indicator
             # Secondary: Other Technical Indicators
             'RSI', 'MACD', 'MACD_Signal', 'MACD_Hist',
             'BB_Position', 'BB_Width',
@@ -88,7 +99,18 @@ class StockPredictor:
             return pd.DataFrame(), pd.Series()
         
         X = data[available_features].copy()
-        y = data['Target_Hit']  # Binary: 1 if 5%+ gain, 0 otherwise
+        
+        # Target selection based on weekly or intraday
+        if weekly:
+            # For weekly trading: Target 5-10% weekly gain
+            if 'Target_Hit_Min' in data.columns:
+                y = data['Target_Hit_Min']  # Binary: 1 if 5%+ weekly gain, 0 otherwise
+            else:
+                # Fallback to regular Target_Hit
+                y = data['Target_Hit']
+        else:
+            # Intraday target (legacy)
+            y = data['Target_Hit']  # Binary: 1 if 5%+ intraday gain, 0 otherwise
         
         # Clean infinity and extreme values
         X = self._clean_features(X)
@@ -143,12 +165,13 @@ class StockPredictor:
         
         return X_clean
     
-    def train_model(self, tickers: List[str]) -> bool:
+    def train_model(self, tickers: List[str], weekly: bool = True) -> bool:
         """
-        Train ML model on historical data from multiple tickers
+        Train ML model on historical data from multiple tickers (WEEKLY SWING TRADING)
         
         Args:
             tickers: List of tickers to train on
+            weekly: Train for weekly gains (True) or intraday (False)
             
         Returns:
             True if training successful
@@ -156,7 +179,8 @@ class StockPredictor:
         all_X = []
         all_y = []
         
-        print(f"Training model on {len(tickers)} tickers...")
+        timeframe = "weekly" if weekly else "intraday"
+        print(f"Training model for {timeframe} trading on {len(tickers)} tickers...")
         
         for ticker in tickers:
             data = self.data_analyzer.get_historical_data(ticker, config.HISTORICAL_YEARS)
@@ -164,7 +188,7 @@ class StockPredictor:
                 continue
                 
             data = self.data_analyzer.calculate_technical_indicators(data)
-            X, y = self.prepare_features(data)
+            X, y = self.prepare_features(data, weekly=weekly)
             
             if len(X) > 0 and len(y) > 0:
                 all_X.append(X)
@@ -276,12 +300,13 @@ class StockPredictor:
         
         return True
     
-    def predict_stock(self, ticker: str) -> Optional[Dict]:
+    def predict_stock(self, ticker: str, weekly: bool = True) -> Optional[Dict]:
         """
-        Predict probability of 5% intraday gain for a stock
+        Predict probability of 5-10% WEEKLY gain for a stock (swing trading)
         
         Args:
             ticker: Stock ticker symbol
+            weekly: Predict weekly gains (True) or intraday (False)
             
         Returns:
             Dictionary with prediction results
@@ -289,13 +314,13 @@ class StockPredictor:
         if self.model is None:
             return None
         
-        # Get recent data
-        data = self.data_analyzer.get_historical_data(ticker, years=1)
+        # Get recent data (need more for weekly analysis)
+        data = self.data_analyzer.get_historical_data(ticker, years=2)
         if data is None or data.empty:
             return None
         
         data = self.data_analyzer.calculate_technical_indicators(data)
-        X, _ = self.prepare_features(data)
+        X, _ = self.prepare_features(data, weekly=weekly)
         
         if len(X) == 0:
             return None
@@ -309,7 +334,16 @@ class StockPredictor:
         prediction = self.model.predict(X_latest_scaled)[0]
         
         current_price = data['Close'].iloc[-1]
-        target_price = current_price * (1 + config.TARGET_GAIN_PERCENT / 100)
+        
+        # Calculate targets based on weekly trading
+        if weekly:
+            target_price_min = current_price * (1 + config.TARGET_GAIN_PERCENT_MIN / 100)
+            target_price = current_price * (1 + config.TARGET_GAIN_PERCENT / 100)
+            target_price_max = current_price * (1 + config.TARGET_GAIN_PERCENT_MAX / 100)
+        else:
+            target_price = current_price * (1 + config.TARGET_GAIN_PERCENT / 100)
+            target_price_min = target_price
+            target_price_max = target_price
         
         # Get MA strategy evaluation
         ma_eval = self.ma_strategy.evaluate_stock(data)
@@ -325,6 +359,19 @@ class StockPredictor:
             'volume_ratio': data['Volume_Ratio'].iloc[-1] if not pd.isna(data['Volume_Ratio'].iloc[-1]) else None,
         }
         
+        # Add weekly-specific data
+        if weekly:
+            result['target_price_min'] = target_price_min
+            result['target_price_max'] = target_price_max
+            result['holding_period_days'] = config.HOLDING_PERIOD_DAYS
+            result['trading_style'] = 'WEEKLY_SWING'
+            if 'Weekly_RSI' in data.columns:
+                result['weekly_rsi'] = data['Weekly_RSI'].iloc[-1] if not pd.isna(data['Weekly_RSI'].iloc[-1]) else None
+            if 'Weekly_Momentum' in data.columns:
+                result['weekly_momentum'] = data['Weekly_Momentum'].iloc[-1] if not pd.isna(data['Weekly_Momentum'].iloc[-1]) else None
+            if 'Swing_Strength' in data.columns:
+                result['swing_strength'] = data['Swing_Strength'].iloc[-1] if not pd.isna(data['Swing_Strength'].iloc[-1]) else None
+        
         # Add MA strategy information
         if ma_eval.get('valid'):
             result['ma_score'] = ma_eval['score']
@@ -338,14 +385,15 @@ class StockPredictor:
         
         return result
     
-    def get_top_picks(self, tickers: List[str], top_n: int = 2) -> List[Dict]:
+    def get_top_picks(self, tickers: List[str], top_n: int = 2, weekly: bool = True) -> List[Dict]:
         """
-        Get top N stock picks with highest probability of 5% intraday gain
+        Get top N stock picks with highest probability of 5-10% WEEKLY gain
         Uses 50/250 MA strategy as primary filter
         
         Args:
             tickers: List of tickers to evaluate
-            top_n: Number of top picks to return
+            top_n: Number of top picks to return (for weekly: 2 trades per week)
+            weekly: Get weekly picks (True) or intraday (False)
             
         Returns:
             List of top picks with predictions (filtered by MA strategy)
@@ -353,7 +401,7 @@ class StockPredictor:
         predictions = []
         
         for ticker in tickers:
-            pred = self.predict_stock(ticker)
+            pred = self.predict_stock(ticker, weekly=weekly)
             if pred and pred['probability'] >= config.MIN_CONFIDENCE_SCORE:
                 predictions.append(pred)
         

@@ -15,26 +15,33 @@
 
 ## System Overview
 
-AutoBot is an automated trading system that:
+AutoBot is an automated **WEEKLY SWING TRADING** system that:
 - **Discovers trending stocks** from multiple sources (Yahoo Finance, Moomoo, Twitter, Options, News)
 - Analyzes 40 years of historical market data
-- Uses Machine Learning (XGBoost/Random Forest) to predict stocks with 5% intraday gain potential
+- Uses Machine Learning (XGBoost/Random Forest) to predict stocks with **5-10% WEEKLY gain potential**
 - Implements 50/250 Moving Average strategy as primary filter
-- Analyzes volatility and volume for optimal intraday trading
+- Analyzes **weekly volatility and volume** for optimal swing trading
+- Executes **2 trades per week** (1 buy, 1 sell) with **5-day holding period**
+- Targets **5-10% profit** before end of week
 - Calculates probability of profit and conviction levels
 - Executes trades through Moomoo exchange with manual approval
 - Manages risk with stop-loss and take-profit mechanisms
 - Comprehensive testing framework (backtesting, forward testing, stress testing)
 
 **Key Features:**
+- ✅ **Weekly Swing Trading Strategy** - 2 trades per week (1 buy, 1 sell)
+- ✅ **5-10% Weekly Profit Targets** - Take profit when 5-10% gain is achieved
+- ✅ **5-Day Holding Period** - Hold positions for approximately 1 week
 - ✅ **Multi-Source Stock Discovery** (Yahoo Finance, Moomoo, Twitter, Options, News)
-- ✅ **Volatility & Volume Analysis** for intraday trading optimization
+- ✅ **News Sentiment Analysis** - Analyzes news sentiment and ranks stocks by sentiment score (0-100)
+- ✅ **Profitable Stock Discovery** - Intelligent discovery that finds stocks with >90% probability and HIGH/VERY_HIGH conviction
+- ✅ **Weekly Volatility & Volume Analysis** for swing trading optimization
 - ✅ **Probability & Conviction Scoring** (VERY_HIGH, HIGH, MEDIUM, LOW, VERY_LOW)
 - ✅ **50/250 Moving Average Golden Cross Strategy**
-- ✅ **RSI Overbought/Oversold Detection**
-- ✅ **ML-based stock prediction**
+- ✅ **Weekly RSI and Momentum Indicators** for swing trading
+- ✅ **ML-based stock prediction** (XGBoost, Random Forest, Gradient Boosting) trained on weekly patterns
 - ✅ **Top 10 Trending Stocks** with ranking
-- ✅ **Top 5 Trading Suggestions** with entry points and profit targets
+- ✅ **Top 5 Weekly Trading Suggestions** with entry points and profit targets
 - ✅ **Real-time market data integration**
 - ✅ **Automated trade execution** (with approval)
 - ✅ **Risk management and position monitoring**
@@ -311,17 +318,24 @@ The bot uses two configuration files:
 
 Open `config.py` in a text editor to customize:
 
-#### Trading Parameters
+#### Trading Parameters - WEEKLY SWING TRADING
 ```python
-TARGET_GAIN_PERCENT = 5.0  # Target intraday gain (5%)
+TRADING_TIMEFRAME = 'WEEKLY'  # Weekly trading strategy
+TARGET_GAIN_PERCENT_MIN = 5.0  # Minimum target weekly gain (5%)
+TARGET_GAIN_PERCENT_MAX = 10.0  # Maximum target weekly gain (10%)
+TARGET_GAIN_PERCENT = 7.5  # Default target weekly gain (7.5%)
+TRADES_PER_WEEK = 2  # Number of trades per week (1 buy, 1 sell)
 MAX_POSITIONS = 2  # Maximum concurrent positions
-MAX_POSITION_SIZE = 10000  # Maximum position size in dollars
+MAX_POSITION_SIZE = 50000  # Maximum position size in dollars
+HOLDING_PERIOD_DAYS = 5  # Target holding period (1 week = 5 trading days)
 ```
 
-#### Risk Management
+#### Risk Management - WEEKLY TIMEFRAME
 ```python
-STOP_LOSS_PERCENT = 2.0  # Stop loss at 2% below entry
-TAKE_PROFIT_PERCENT = 5.0  # Take profit at 5% above entry
+STOP_LOSS_PERCENT = 3.0  # Stop loss at 3% below entry (wider for weekly trades)
+TAKE_PROFIT_PERCENT = 7.5  # Take profit at 7.5% above entry
+TAKE_PROFIT_MIN = 5.0  # Minimum take profit (exit at 5% minimum)
+TAKE_PROFIT_MAX = 10.0  # Maximum take profit (target 10% max)
 ```
 
 #### Moving Average Strategy (PRIMARY)
@@ -353,11 +367,20 @@ Edit the list of stocks to analyze in `config.py`:
 
 ```python
 POPULAR_TICKERS = [
+    # ETFs for market analysis
+    'SPY', 'QQQ', 'DIA', 'IWM',
+    # Large cap tech (good for weekly swing trading)
     'AAPL', 'MSFT', 'GOOGL', 'AMZN', 'NVDA', 'META', 'TSLA', 'NFLX',
+    # Other liquid stocks suitable for swing trading
     'AMD', 'INTC', 'CRM', 'ORCL', 'ADBE', 'PYPL', 'UBER', 'LYFT',
     # Add your preferred tickers here
 ]
 ```
+
+**Note for Weekly Swing Trading:** Choose stocks with:
+- High liquidity (daily volume > $1M)
+- Weekly volatility of 5-15% (ideal range)
+- Suitable for 5-day holding periods
 
 ---
 
@@ -365,7 +388,7 @@ POPULAR_TICKERS = [
 
 ### Mode 1: Enhanced Analysis Mode (Recommended First Run)
 
-**Purpose:** Get comprehensive trade recommendations with multi-source discovery WITHOUT executing trades.
+**Purpose:** Get comprehensive **WEEKLY SWING TRADING** recommendations with multi-source discovery WITHOUT executing trades.
 
 **Command:**
 ```bash
@@ -373,38 +396,61 @@ python main.py --mode analyze
 ```
 
 **What It Does:**
-1. **Multi-Source Stock Discovery:**
+1. **Profitable Stock Discovery (WEEKLY SWING TRADING):**
+   - Runs intelligent discovery until 10 profitable stocks are found
+   - Filters by: Probability > 90% AND Conviction = HIGH or VERY_HIGH
+   - **Targets stocks suitable for 5-10% WEEKLY gains**
+   - Maximum 10,000 stocks analyzed
+   - Integrates sentiment analysis into discovery process
+   
+2. **Multi-Source Stock Discovery:**
    - Discovers trending stocks from Yahoo Finance
    - Gets top stocks from Moomoo
    - Analyzes Twitter/X trending mentions
    - Identifies unusual options activity
    - Scans financial news for trending stocks
    
-2. **Volatility & Volume Analysis:**
-   - Ranks stocks by intraday volatility
-   - Analyzes volume patterns and liquidity
-   - Identifies stocks with optimal volatility for intraday trading
+3. **News Sentiment Analysis:**
+   - Analyzes recent news articles for each stock (last 7 days)
+   - Calculates sentiment score (0-100): 0 = most negative, 100 = most positive
+   - Uses VADER Sentiment or TextBlob for analysis
+   - Ranks stocks by sentiment score
+   - Provides sentiment labels: VERY_POSITIVE, POSITIVE, NEUTRAL, NEGATIVE, VERY_NEGATIVE
    
-3. **Probability & Conviction Scoring:**
-   - Calculates probability of profit using ML models
+4. **Weekly Volatility & Volume Analysis:**
+   - Ranks stocks by **weekly volatility** (5-day patterns)
+   - Analyzes volume patterns and liquidity
+   - Identifies stocks with optimal volatility for **weekly swing trading**
+   - Calculates swing trading suitability scores
+   
+5. **Probability & Conviction Scoring (WEEKLY):**
+   - Calculates probability of **5-10% WEEKLY profit** using ML models
    - Evaluates 50/250 MA strategy alignment
-   - Analyzes technical indicators (RSI, MACD, Bollinger Bands)
+   - Analyzes **weekly technical indicators** (Weekly RSI, Weekly Momentum)
+   - Analyzes swing strength indicators
    - Assigns conviction levels (VERY_HIGH, HIGH, MEDIUM, LOW, VERY_LOW)
    
-4. **Top 10 Trending Stocks:**
-   - Displays top 10 stocks sorted by volatility and volume
-   - Shows probability and conviction for each
+6. **Top 5 Weekly Trading Suggestions:**
+   - Selects best stocks meeting profitability criteria
+   - Provides entry points and **weekly profit targets (5%, 7.5%, 10%)**
+   - Shows stop-loss levels (3% for weekly trades)
+   - Displays **5-day holding period** recommendation
+   - Includes sentiment scores
    
-5. **Top 5 Trading Suggestions:**
-   - Selects best 5 stocks from top 10
-   - Provides entry points and profit targets (2%, 3%, 5%)
-   - Shows stop-loss levels
-   - Displays maximum profit potential
-   
-6. **Does NOT execute any trades**
+7. **Does NOT execute any trades**
 
 **Expected Output:**
 ```
+================================================================================
+ENHANCED WEEKLY SWING TRADING ANALYSIS MODE
+================================================================================
+Strategy: 2 trades per week (1 buy, 1 sell)
+Profit Target: 5.0% - 10.0%
+Holding Period: 5 trading days
+No trades will be executed in this mode
+
+================================================================================
+
 ============================================================
 Initializing Automated Trading Bot
 ============================================================
@@ -417,25 +463,29 @@ Initializing Automated Trading Bot
   QQQ: BULL market, ✅ Golden Cross, MA Separation: 3.42%, RSI: 62.15
   DIA: BULL market, ✅ Golden Cross, MA Separation: 1.89%, RSI: 55.67
 
-3. Training ML model on historical data...
-Training model on 10 tickers...
+3. Training ML model for weekly trading...
+Training model for weekly trading on 10 tickers...
 Model trained successfully!
 Train accuracy: 0.8234
 Test accuracy: 0.7891
 
 ================================================================================
-TRADE RECOMMENDATIONS
+WEEKLY SWING TRADING RECOMMENDATIONS
 ================================================================================
 
 Recommendation #1:
   Ticker: AAPL
-  Action: BUY
+  Action: BUY (WEEKLY SWING)
   Current Price: $185.50
-  Target Price: $194.78
-  Stop Loss: $181.79
-  Take Profit: $194.78
-  Quantity: 53 shares
-  Position Value: $9831.50
+  Entry Price: $184.57 (0.5% below current)
+  Weekly Targets:
+    • Minimum (5%): $193.80
+    • Default (7.5%): $198.41
+    • Maximum (10%): $203.03
+  Stop Loss: $179.03 (-3%)
+  Holding Period: 5 trading days
+  Quantity: 27 shares
+  Position Value: $4983.39
   ML Probability: 78.50%
 
   📊 MOVING AVERAGE STRATEGY (50/250 MA):
@@ -449,10 +499,13 @@ Recommendation #1:
      Trend Strength: 0.95
      Combined Score (ML + MA): 82.5%
 
-  📈 Technical Indicators:
+  📈 Weekly Technical Indicators:
      RSI: 45.23
+     Weekly RSI: 52.15
+     Weekly Momentum: 3.8%
+     Swing Strength: 0.85
      Volume Ratio: 1.85
-     Expected Gain: 5.00%
+     Expected Weekly Gain: 5-10%
 ```
 
 **First Run Notes:**
@@ -462,7 +515,7 @@ Recommendation #1:
 
 ### Mode 2: Trade Mode (With Approval)
 
-**Purpose:** Get recommendations AND execute trades after manual approval.
+**Purpose:** Get **WEEKLY SWING TRADING** recommendations AND execute trades after manual approval.
 
 **Command:**
 ```bash
@@ -470,25 +523,33 @@ python main.py --mode trade
 ```
 
 **What It Does:**
-1. Performs all analysis steps (same as analyze mode)
+1. Performs all weekly swing trading analysis steps (same as analyze mode)
 2. For each recommendation, requests your approval
 3. Validates risk management criteria
 4. Executes approved trades through Moomoo API
+5. **Monitors positions over 5-day holding period**
+6. **Exits when 5-10% profit target is reached or at end of week**
 
 **Approval Process:**
 ```
 ================================================================================
-APPROVAL REQUEST
+APPROVAL REQUEST - WEEKLY SWING TRADE
 ================================================================================
 Ticker: AAPL
-Action: BUY
+Action: BUY (WEEKLY SWING)
 Price: $185.50
-Quantity: 53 shares
-Total Value: $9831.50
-Target: $194.78 (5.00% gain)
-Stop Loss: $181.79
+Entry Price: $184.57
+Quantity: 27 shares
+Total Value: $4983.39
+Weekly Targets:
+  • Minimum (5%): $193.80
+  • Default (7.5%): $198.41
+  • Maximum (10%): $203.03
+Stop Loss: $179.03 (-3%)
+Holding Period: 5 trading days
 Confidence: HIGH (78.50%)
 MA Signal: STRONG_BUY
+Trading Style: WEEKLY_SWING
 ================================================================================
 
 Do you approve this trade? (yes/no):
@@ -587,16 +648,38 @@ AAPL | Probability: 82.50% | Conviction: 🔥 VERY_HIGH | ML: HIGH | MA: STRONG_
 TSLA | Probability: 75.30% | Conviction: ✅ HIGH | ML: MEDIUM | MA: BUY
 ```
 
-**Top 5 Trading Suggestions:**
+**News Sentiment Ranking:**
 ```
-1. AAPL
+1. AAPL | Sentiment: 🚀 85.2/100 | Label: VERY_POSITIVE | Articles: 12 | Confidence: HIGH
+2. TSLA | Sentiment: ✅ 72.5/100 | Label: POSITIVE | Articles: 8 | Confidence: MEDIUM
+3. NVDA | Sentiment: ➡️ 55.3/100 | Label: NEUTRAL | Articles: 5 | Confidence: LOW
+```
+
+**Profitable Stocks Discovery:**
+```
+✅ Found: AAPL - Probability: 92.50%, Conviction: VERY_HIGH, Sentiment: 85.2
+✅ Found: TSLA - Probability: 91.20%, Conviction: HIGH, Sentiment: 72.5
+...
+Analyzed: 1,234 stocks
+Found: 10 profitable stocks
+```
+
+**Top 5 Weekly Trading Suggestions:**
+```
+1. AAPL - WEEKLY_SWING
    Current Price: $185.50
-   Entry Price: $185.13
-   Stop Loss: $181.79
-   Targets: 2%=$188.83 | 3%=$190.68 | 5%=$194.38
-   Max Profit Potential: 5.00%
-   Probability: 82.50%
+   Entry Price: $184.57 (0.5% below)
+   Stop Loss: $179.03 (-3%)
+   Weekly Targets:
+     • Minimum (5%): $193.80
+     • Default (7.5%): $198.41
+     • Maximum (10%): $203.03
+   Profit Potential: 5.00% - 10.00%
+   Holding Period: 5 trading days
+   Probability: 92.50%
    Conviction: VERY_HIGH
+   ML Score: HIGH | MA Signal: STRONG_BUY
+   Sentiment: 85.2/100 (VERY_POSITIVE)
 ```
 
 ### Market Trend Analysis
@@ -770,7 +853,7 @@ rmdir /s data_cache  # Windows
 
 ---
 
-## Best Practices
+## Best Practices for Weekly Swing Trading
 
 ### 1. Start with Simulation Mode
 
@@ -779,46 +862,66 @@ rmdir /s data_cache  # Windows
 TRADING_ENV=SIMULATE
 ```
 
-Test for at least 1-2 weeks before considering live trading.
+Test for at least **2-4 weeks** (8-16 trades) before considering live trading.
 
 ### 2. Review Recommendations Carefully
 
-Before approving any trade:
-- ✅ Check current market conditions
+Before approving any **weekly swing trade**:
+- ✅ Check current market conditions and weekly trend
 - ✅ Verify stock fundamentals
-- ✅ Review news and events
-- ✅ Confirm MA strategy signals
-- ✅ Validate risk parameters
+- ✅ Review news and events for the week ahead
+- ✅ Confirm MA strategy signals (50/250 MA)
+- ✅ Check weekly volatility patterns
+- ✅ Validate risk parameters (3% stop-loss)
+- ✅ Confirm you can hold for **5 trading days**
 
 ### 3. Start with Small Positions
 
-Even in simulation, use realistic position sizes:
+Even in simulation, use realistic position sizes for **weekly trading**:
 ```python
 # In config.py
-MAX_POSITION_SIZE = 1000  # Start small
-MAX_POSITIONS = 1  # One position at a time initially
+MAX_POSITION_SIZE = 5000  # Start with smaller positions for weekly trades
+MAX_POSITIONS = 2  # Maximum 2 positions (1 buy, 1 sell per week)
 ```
 
-### 4. Monitor Regularly
+### 4. Monitor Weekly
 
-- Check positions daily
-- Review trade performance weekly
-- Adjust parameters based on results
+- **Monday**: Review weekly analysis and place 1-2 trades
+- **Mid-week**: Check progress toward 5-10% targets
+- **Friday**: Review trade performance, exit at profit targets
+- **Weekly Review**: Analyze results, adjust parameters
 - Keep logs of all trades
 
-### 5. Risk Management
+### 5. Risk Management for Weekly Trading
 
 **Never:**
 - ❌ Risk more than you can afford to lose
-- ❌ Disable stop-loss
-- ❌ Override approval system without testing
-- ❌ Trade during high volatility without adjustment
+- ❌ Disable stop-loss (3% for weekly trades)
+- ❌ Override approval system without extensive testing
+- ❌ Hold beyond 5 days without reassessment
+- ❌ Execute more than 2 trades per week
 
 **Always:**
-- ✅ Use stop-loss (default: 2%)
-- ✅ Set take-profit (default: 5%)
-- ✅ Limit position sizes
-- ✅ Diversify (don't put all capital in one stock)
+- ✅ Use stop-loss (default: 3% for weekly)
+- ✅ Set take-profit targets (5%, 7.5%, 10%)
+- ✅ **Exit when 5-10% profit is achieved**, don't wait for end of week
+- ✅ Limit to **2 trades per week** (1 buy, 1 sell)
+- ✅ Hold for approximately **5 trading days**
+- ✅ Diversify across different sectors
+- ✅ Monitor weekly volatility and market conditions
+
+### 6. Weekly Trading Strategy
+
+**Optimal Trading Days:**
+- **Monday/Tuesday**: Best days to enter positions (start of week)
+- **Wednesday/Thursday**: Monitor progress, adjust stops
+- **Thursday/Friday**: Take profits if 5-10% target reached
+
+**Weekly Profit Taking:**
+- Exit at **5% minimum** if reached by mid-week
+- Hold for **7.5% target** if strong momentum
+- Take **10% profit** immediately when achieved
+- Exit all positions by **Friday close** if no target hit
 
 ### 6. Keep OpenD Running
 
@@ -838,6 +941,203 @@ MAX_POSITIONS = 1  # One position at a time initially
 - Document successful trade patterns
 - Record lessons learned
 - Track performance metrics
+
+---
+
+## System Architecture & Modules
+
+### Core Modules
+
+#### 1. `main.py` - Entry Point
+- Command-line interface with multiple execution modes
+- Argument parsing for mode selection and parameters
+- Orchestrates bot initialization and execution
+
+**Modes:**
+- `analyze`: Enhanced analysis with profitable stock discovery
+- `trade`: Execute trades with approval
+- `monitor`: Monitor existing positions
+- `backtest`: Historical backtesting
+- `test`: Comprehensive testing
+- `forward-test`: Forward testing
+- `stress-test`: Stress testing
+
+#### 2. `trading_bot.py` - Main Trading Bot
+- Orchestrates all trading operations
+- Manages bot initialization and shutdown
+- Coordinates between data analysis, prediction, and execution
+- Handles daily analysis and position monitoring
+
+#### 3. `enhanced_analyzer.py` - Enhanced Analysis Engine
+- **NEW: Profitable Stock Discovery**: Finds stocks with >90% probability and HIGH/VERY_HIGH conviction
+- Multi-source stock discovery integration
+- Sentiment analysis integration
+- Volatility and volume ranking
+- Probability and conviction calculation
+- Top trading suggestions generation
+
+**Key Methods:**
+- `discover_profitable_stocks()`: Intelligent discovery with strict criteria
+- `rank_stocks_by_sentiment()`: Ranks stocks by news sentiment
+- `analyze_with_probability()`: Calculates comprehensive probability scores
+- `run_enhanced_analysis()`: Complete analysis pipeline
+
+#### 4. `news_sentiment_analyzer.py` - News Sentiment Analysis (NEW)
+- Analyzes news sentiment for stocks using recent articles
+- Calculates sentiment score (0-100 scale)
+- Supports multiple sentiment analysis libraries:
+  - VADER Sentiment (preferred)
+  - TextBlob (fallback)
+  - Simple keyword-based (fallback)
+- Ranks stocks by sentiment score
+
+**Key Methods:**
+- `calculate_sentiment_score()`: Calculates sentiment for a stock
+- `rank_stocks_by_sentiment()`: Ranks multiple stocks by sentiment
+- `get_stock_news()`: Fetches recent news articles
+
+**Sentiment Score Formula:**
+```
+sentiment_score = ((avg_sentiment + 1) / 2) * 100
+```
+Where `avg_sentiment` is the average sentiment from -1 (negative) to 1 (positive)
+
+#### 5. `stock_discovery.py` - Multi-Source Discovery
+- Discovers trending stocks from multiple sources:
+  - Yahoo Finance trending stocks
+  - Moomoo platform stocks
+  - Twitter/X mentions (placeholder)
+  - Unusual options activity
+  - Financial news trending stocks
+- Combines and deduplicates discoveries
+- Tracks stocks appearing in multiple sources
+
+#### 6. `data_analyzer.py` - Historical Data Analysis
+- Fetches 40 years of historical market data
+- Calculates comprehensive technical indicators:
+  - Moving Averages (20, 50, 200, 250-day)
+  - RSI with overbought/oversold signals
+  - MACD (Moving Average Convergence Divergence)
+  - Bollinger Bands
+  - Volume indicators
+  - Volatility metrics
+- Analyzes market trends from major indices (SPY, QQQ, DIA)
+- Caches data for performance
+
+#### 7. `stock_predictor.py` - ML-Based Prediction
+- Trains machine learning models on historical data
+- Supports multiple model types:
+  - XGBoost (default, fast and accurate)
+  - Random Forest (interpretable)
+  - Gradient Boosting (complex patterns)
+- Predicts probability of 5% intraday gains
+- Feature engineering and scaling
+- Model persistence and loading
+
+#### 8. `probability_scorer.py` - Comprehensive Scoring
+- Calculates combined probability from multiple factors:
+  - ML Probability (40% weight)
+  - MA Strategy Probability (30% weight)
+  - Technical Indicator Probability (20% weight)
+  - Volatility Probability (10% weight)
+- Assigns conviction levels:
+  - VERY_HIGH: ≥85% probability
+  - HIGH: ≥75% probability
+  - MEDIUM: ≥65% probability
+  - LOW: ≥50% probability
+  - VERY_LOW: <50% probability
+
+#### 9. `ma_strategy.py` - Moving Average Strategy
+- Implements 50/250 Moving Average Golden Cross strategy
+- Evaluates stocks based on:
+  - Golden Cross (50MA > 250MA)
+  - Price position relative to MAs
+  - MA separation and trend strength
+  - Recent crossover detection
+- Generates MA signals: STRONG_BUY, BUY, NEUTRAL, AVOID
+
+#### 10. `volatility_analyzer.py` - Volatility & Volume Analysis
+- Calculates intraday volatility metrics
+- Analyzes volume patterns and liquidity
+- Generates volatility score (0-100)
+- Generates volume score (0-100)
+- Combined ranking for intraday trading suitability
+
+#### 11. `risk_manager.py` - Risk Management
+- Position sizing based on risk parameters
+- Stop-loss and take-profit calculation
+- Position limit enforcement
+- Risk validation before trade execution
+
+#### 12. `moomoo_integration.py` - Moomoo API Integration
+- Connects to Moomoo OpenAPI via OpenD Gateway
+- Executes buy/sell orders
+- Retrieves account information
+- Fetches market data
+- Monitors positions
+- Supports simulation and real trading modes
+
+#### 13. `backtester.py` - Testing Framework
+- Historical backtesting on past data
+- Forward testing on recent out-of-sample data
+- Stress testing under extreme conditions
+- Comprehensive testing combining all methods
+- Performance metrics calculation
+
+### Data Flow
+
+```
+1. User runs: python main.py --mode analyze
+   ↓
+2. Enhanced Analyzer initiates profitable stock discovery
+   ↓
+3. Stock Discovery finds candidates from multiple sources
+   ↓
+4. Sentiment Analyzer ranks stocks by news sentiment
+   ↓
+5. Volatility Analyzer ranks by volatility and volume
+   ↓
+6. Probability Scorer calculates probability and conviction
+   ↓
+7. Data Analyzer provides technical indicators
+   ↓
+8. Stock Predictor provides ML predictions
+   ↓
+9. MA Strategy evaluates moving average alignment
+   ↓
+10. Results filtered: >90% probability, HIGH/VERY_HIGH conviction
+   ↓
+11. Top suggestions generated with entry/exit points
+   ↓
+12. Results displayed to user
+```
+
+### Profitable Stock Discovery Logic
+
+The new discovery system implements intelligent filtering:
+
+1. **Discovery Phase:**
+   - Gathers stocks from all sources (Yahoo, Moomoo, Twitter, Options, News)
+   - Adds sentiment-ranked stocks
+   - Combines and deduplicates candidates
+
+2. **Analysis Phase:**
+   - Analyzes up to 10,000 stocks
+   - For each stock:
+     - Calculates comprehensive probability score
+     - Determines conviction level
+     - Analyzes sentiment
+     - Checks criteria: Probability > 90% AND Conviction = HIGH/VERY_HIGH
+
+3. **Selection Phase:**
+   - Stops when 10 profitable stocks are found
+   - Sorts by probability (highest first)
+   - Returns top 10 stocks meeting criteria
+
+4. **Output Phase:**
+   - Displays profitable stocks with all metrics
+   - Shows sentiment rankings
+   - Provides top 5 trading suggestions
 
 ---
 
@@ -969,12 +1269,12 @@ python main.py --mode trade --auto-approve
 
 | Mode | Command | Purpose |
 |------|---------|---------|
-| **analyze** | `--mode analyze` | Enhanced multi-source analysis with top 10 trending and top 5 suggestions |
-| **trade** | `--mode trade` | Execute trades with manual approval |
-| **monitor** | `--mode monitor` | Monitor existing positions |
-| **backtest** | `--mode backtest --tickers TICKER --start-date DATE --end-date DATE` | Historical backtesting |
-| **test** | `--mode test --tickers TICKER` | Comprehensive testing (backtest + forward + stress) |
-| **forward-test** | `--mode forward-test --tickers TICKER` | Out-of-sample forward testing |
+| **analyze** | `--mode analyze` | **WEEKLY SWING TRADING** analysis with profitable stock discovery (>90% probability, HIGH/VERY_HIGH conviction), sentiment analysis, and top 5 weekly suggestions (5-10% targets) |
+| **trade** | `--mode trade` | Execute **weekly swing trades** with manual approval (2 trades per week, 5-day holding period) |
+| **monitor** | `--mode monitor` | Monitor existing positions (check for 5-10% profit targets) |
+| **backtest** | `--mode backtest --tickers TICKER --start-date DATE --end-date DATE` | Historical backtesting (weekly strategy) |
+| **test** | `--mode test --tickers TICKER` | Comprehensive testing (backtest + forward + stress) for weekly trading |
+| **forward-test** | `--mode forward-test --tickers TICKER` | Out-of-sample forward testing (weekly) |
 | **stress-test** | `--mode stress-test --tickers TICKER` | Stress testing under extreme conditions |
 
 ### Configuration Files
@@ -1057,7 +1357,77 @@ You now have a complete guide to set up and run AutoBot. Remember:
 
 ---
 
-*Last Updated: 2025-01-13*
-*Version: 1.0*
+### News Sentiment Analysis Configuration
+
+The sentiment analyzer supports multiple libraries. Install at least one:
+
+```bash
+# Option 1: VADER Sentiment (recommended)
+pip install vaderSentiment
+
+# Option 2: TextBlob (alternative)
+pip install textblob
+
+# Both are included in requirements.txt
+```
+
+**Sentiment Analysis Features:**
+- Analyzes last 7 days of news (configurable)
+- Weighted analysis: 60% title sentiment, 40% summary sentiment
+- Confidence levels: HIGH (≥10 articles), MEDIUM (≥5 articles), LOW (<5 articles)
+- Fallback to keyword-based analysis if libraries unavailable
+
+### Profitable Discovery Configuration
+
+The discovery system can be customized in `enhanced_analyzer.py`:
+
+```python
+# In discover_profitable_stocks() method:
+max_stocks = 10000  # Maximum stocks to analyze
+target_count = 10   # Number of profitable stocks to find
+probability_threshold = 90.0  # Minimum probability (%)
+conviction_levels = ['HIGH', 'VERY_HIGH']  # Required conviction levels
+```
+
+---
+
+## Weekly Trading Strategy Summary
+
+**Trading Frequency:** 2 trades per week (1 buy, 1 sell)
+
+**Profit Targets:**
+- Minimum: 5% (take profit if reached mid-week)
+- Default: 7.5% (target profit)
+- Maximum: 10% (exit immediately when reached)
+
+**Holding Period:** 5 trading days (1 week)
+
+**Risk Management:**
+- Stop Loss: 3% (wider than intraday to accommodate weekly volatility)
+- Take Profit: Exit when 5-10% profit is achieved, don't wait for end of week
+
+**Trading Days:**
+- Entry: Monday/Tuesday (start of week)
+- Monitor: Wednesday/Thursday (check progress)
+- Exit: Thursday/Friday (take profits) or when targets hit
+
+**Position Sizing:**
+- Maximum 2 concurrent positions
+- Maximum $50,000 per position
+- Diversify across sectors
+
+**Best Suited Stocks:**
+- High liquidity (daily volume > $1M)
+- Weekly volatility: 5-15%
+- Strong MA signals (50/250 golden cross)
+- Positive sentiment scores
+- Probability > 90%, Conviction HIGH/VERY_HIGH
+
+---
+
+*Last Updated: 2025-12-15*
+*Version: 3.0 - **MAJOR UPDATE: Transformed to Weekly Swing Trading Strategy***
+*Previous Version 2.0 - Added News Sentiment Analysis & Profitable Stock Discovery*
+*Previous Version 1.0 - Intraday Trading Strategy*
 
 

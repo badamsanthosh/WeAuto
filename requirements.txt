@@ -28,6 +28,8 @@ pytz>=2023.3
 # News and sentiment analysis
 feedparser>=6.0.10
 newspaper3k>=0.2.8
+vaderSentiment>=3.3.2
+textblob>=0.17.1
 
 # Options data (if available)
 # yahooquery>=2.3.1  # For options data

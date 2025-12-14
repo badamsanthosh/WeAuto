@@ -10,6 +10,7 @@ import os
 import pickle
 from typing import List, Dict, Optional
 import warnings
+import config
 warnings.filterwarnings('ignore')
 
 class DataAnalyzer:
@@ -193,7 +194,7 @@ class DataAnalyzer:
         df['Volatility'] = df['Daily_Return'].rolling(window=20).std() * np.sqrt(252)
         df['Volatility'] = df['Volatility'].replace([np.inf, -np.inf], np.nan)
         
-        # Intraday range - handle division by zero
+        # Intraday range - handle division by zero (kept for reference)
         df['Intraday_Range'] = np.where(
             df['Close'] != 0,
             (df['High'] - df['Low']) / df['Close'],
@@ -207,8 +208,60 @@ class DataAnalyzer:
         )
         df['Intraday_Gain'] = df['Intraday_Gain'].replace([np.inf, -np.inf], np.nan)
         
-        # Target: 5% intraday gain
-        df['Target_Hit'] = (df['Intraday_Gain'] >= 5.0).astype(int)
+        # === WEEKLY TRADING METRICS ===
+        # Weekly gain (5-day forward return for swing trading)
+        df['Weekly_Gain'] = df['Close'].pct_change(5).shift(-5) * 100
+        df['Weekly_Gain'] = df['Weekly_Gain'].replace([np.inf, -np.inf], np.nan)
+        
+        # Weekly high/low range
+        df['Weekly_High'] = df['High'].rolling(window=5).max()
+        df['Weekly_Low'] = df['Low'].rolling(window=5).min()
+        df['Weekly_Range'] = np.where(
+            df['Close'] != 0,
+            (df['Weekly_High'] - df['Weekly_Low']) / df['Close'] * 100,
+            np.nan
+        )
+        
+        # Weekly volatility (5-day rolling std)
+        df['Weekly_Volatility'] = df['Daily_Return'].rolling(window=5).std() * np.sqrt(5) * 100
+        df['Weekly_Volatility'] = df['Weekly_Volatility'].replace([np.inf, -np.inf], np.nan)
+        
+        # Weekly momentum indicators
+        df['Weekly_Momentum'] = df['Close'].pct_change(5) * 100
+        df['Weekly_Momentum'] = df['Weekly_Momentum'].replace([np.inf, -np.inf], np.nan)
+        
+        # Weekly RSI (calculated over 5 days for swing trading)
+        weekly_delta = df['Close'].diff()
+        weekly_gain = (weekly_delta.where(weekly_delta > 0, 0)).rolling(window=5).mean()
+        weekly_loss = (-weekly_delta.where(weekly_delta < 0, 0)).rolling(window=5).mean()
+        weekly_rs = np.where(weekly_loss != 0, weekly_gain / weekly_loss, np.nan)
+        df['Weekly_RSI'] = np.where(
+            ~np.isnan(weekly_rs) & (weekly_rs != -1),
+            100 - (100 / (1 + weekly_rs)),
+            np.nan
+        )
+        
+        # Weekly volume trend
+        df['Weekly_Volume_Avg'] = df['Volume'].rolling(window=5).mean()
+        df['Weekly_Volume_Trend'] = np.where(
+            df['Weekly_Volume_Avg'].shift(1) != 0,
+            (df['Weekly_Volume_Avg'] - df['Weekly_Volume_Avg'].shift(1)) / df['Weekly_Volume_Avg'].shift(1) * 100,
+            np.nan
+        )
+        
+        # Swing trading strength (combination of weekly indicators)
+        df['Swing_Strength'] = (
+            (df['Weekly_Momentum'] > 0).astype(int) * 0.3 +
+            ((df['Weekly_RSI'] > 30) & (df['Weekly_RSI'] < 70)).astype(int) * 0.3 +
+            (df['Weekly_Volume_Trend'] > 0).astype(int) * 0.2 +
+            (df['MA_Golden_Cross'] == 1).astype(int) * 0.2
+        )
+        
+        # Target: 5-10% weekly gain for swing trading
+        df['Target_Hit'] = ((df['Weekly_Gain'] >= config.TARGET_GAIN_PERCENT_MIN) & 
+                           (df['Weekly_Gain'] <= config.TARGET_GAIN_PERCENT_MAX * 1.5)).astype(int)
+        df['Target_Hit_Min'] = (df['Weekly_Gain'] >= config.TARGET_GAIN_PERCENT_MIN).astype(int)
+        df['Target_Hit_Max'] = (df['Weekly_Gain'] >= config.TARGET_GAIN_PERCENT_MAX).astype(int)
         
         return df
     
@@ -248,7 +301,7 @@ class DataAnalyzer:
     
     def get_intraday_patterns(self, data: pd.DataFrame) -> Dict:
         """
-        Analyze intraday patterns from historical data
+        Analyze intraday patterns from historical data (legacy method, kept for compatibility)
         
         Args:
             data: DataFrame with OHLCV and technical indicators
@@ -273,6 +326,48 @@ class DataAnalyzer:
             'avg_volatility': big_gain_days['Volatility'].mean(),
             'avg_bb_position': big_gain_days['BB_Position'].shift(1).mean(),
             'macd_bullish_ratio': (big_gain_days['MACD'].shift(1) > big_gain_days['MACD_Signal'].shift(1)).mean(),
+        }
+        
+        return patterns
+    
+    def get_weekly_patterns(self, data: pd.DataFrame) -> Dict:
+        """
+        Analyze weekly gain patterns from historical data (for swing trading)
+        
+        Args:
+            data: DataFrame with OHLCV and technical indicators
+            
+        Returns:
+            Dictionary with weekly pattern statistics
+        """
+        if data.empty:
+            return {}
+        
+        # Filter for periods with 5%+ weekly gains
+        big_gain_weeks = data[data['Weekly_Gain'] >= config.TARGET_GAIN_PERCENT_MIN]
+        
+        # Filter for periods with 10%+ weekly gains
+        excellent_gain_weeks = data[data['Weekly_Gain'] >= config.TARGET_GAIN_PERCENT_MAX]
+        
+        if len(big_gain_weeks) == 0:
+            return {}
+        
+        patterns = {
+            'total_big_gain_weeks': len(big_gain_weeks),
+            'total_excellent_gain_weeks': len(excellent_gain_weeks),
+            'frequency': len(big_gain_weeks) / len(data),
+            'excellent_frequency': len(excellent_gain_weeks) / len(data) if len(data) > 0 else 0,
+            'avg_weekly_gain': big_gain_weeks['Weekly_Gain'].mean(),
+            'max_weekly_gain': big_gain_weeks['Weekly_Gain'].max(),
+            'avg_weekly_volatility': big_gain_weeks['Weekly_Volatility'].mean(),
+            'avg_rsi_before': big_gain_weeks['RSI'].shift(5).mean(),
+            'avg_weekly_rsi': big_gain_weeks['Weekly_RSI'].mean(),
+            'avg_volume_ratio': big_gain_weeks['Volume_Ratio'].mean(),
+            'avg_weekly_momentum': big_gain_weeks['Weekly_Momentum'].shift(5).mean(),
+            'avg_swing_strength': big_gain_weeks['Swing_Strength'].mean(),
+            'golden_cross_ratio': (big_gain_weeks['MA_Golden_Cross'] == 1).mean(),
+            'avg_bb_position': big_gain_weeks['BB_Position'].shift(5).mean(),
+            'macd_bullish_ratio': (big_gain_weeks['MACD'].shift(5) > big_gain_weeks['MACD_Signal'].shift(5)).mean(),
         }
         
         return patterns
