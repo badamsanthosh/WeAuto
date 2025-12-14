@@ -1,0 +1,105 @@
+WeAuto - Elite Trading System
+Project Structure (After Restructuring)
+
+ROOT/
+│
+├── src/                           # Main source code directory
+│   ├── __init__.py               # Package initialization
+│   ├── main.py                   # Main entry point
+│   │
+│   ├── core/                     # Core system components
+│   │   ├── __init__.py
+│   │   ├── config.py             # Configuration parameters
+│   │   ├── data_analyzer.py      # Data processing & indicators
+│   │   └── risk_manager.py       # Risk management logic
+│   │
+│   ├── ml/                       # Machine learning modules
+│   │   ├── __init__.py
+│   │   ├── optimized_system.py   # Final optimized system (75%+ target)
+│   │   ├── realistic_system.py   # Realistic system (60-70% target)
+│   │   ├── elite_ml_model.py     # Elite ML ensemble
+│   │   ├── predictor.py          # Stock prediction engine
+│   │   └── scorer.py             # Probability scoring
+│   │
+│   ├── backtesting/              # Backtesting engines
+│   │   ├── __init__.py
+│   │   ├── elite_backtester.py   # Elite backtester (Config A/B)
+│   │   ├── ultra_backtester.py   # 40-year backtesting framework
+│   │   ├── iteration_system.py   # Automated improvement system
+│   │   └── basic_backtester.py   # Basic backtesting
+│   │
+│   ├── strategies/               # Trading strategies
+│   │   ├── __init__.py
+│   │   ├── trading_bot.py        # Main trading bot
+│   │   ├── ma_strategy.py        # Moving average strategy
+│   │   └── stock_discovery.py    # Stock screening
+│   │
+│   └── utils/                    # Utility modules
+│       ├── __init__.py
+│       ├── sp500_fetcher.py      # Fetch S&P 500 symbols
+│       ├── enhanced_analyzer.py  # Advanced technical analysis
+│       ├── volatility_analyzer.py # Volatility metrics
+│       ├── news_sentiment_analyzer.py # News analysis
+│       └── moomoo_integration.py # Moomoo API integration
+│
+├── tests/                        # Unit tests
+│   ├── __init__.py
+│   └── test_data_analyzer.py
+│
+├── data_cache/                   # Cached historical data (gitignored)
+├── results/                      # Backtest results (gitignored)
+├── logs/                         # Execution logs (gitignored)
+├── docs/                         # Additional documentation
+│
+├── AutoBot.Md                    # Complete documentation
+├── README.md                     # GitHub README
+├── requirements.txt              # Python dependencies
+├── .gitignore                    # Git ignore rules
+└── PROJECT_STRUCTURE.txt         # This file
+
+
+REMOVED FILES (Temporary/Obsolete):
+- advanced_backtester.py         # Superseded by elite_backtester.py
+- advanced_ml_predictor.py       # Superseded by optimized_system.py
+- elite_trading_strategy.py      # Merged into strategies/
+- simplified_ml_system.py        # Superseded by realistic_system.py
+- worldclass_ml_system.py        # Superseded by elite_ml_model.py
+- run_backtest_and_fix.py        # Superseded by iteration_system.py
+- run_comprehensive_backtest.py  # Functionality in main.py
+- run_worldclass_40year_backtest.py # Functionality in backtesting/
+- quick_test_worldclass.py       # Temporary testing file
+- test_connection.py             # Temporary testing file
+- debug_moomoo.py                # Temporary debugging file
+- run_elite_backtest_single.py   # Functionality in main.py
+
+REMOVED DOCUMENTATION (Consolidated into AutoBot.Md):
+- ANALYSIS_AND_FIXES.md
+- ELITE_STRATEGY_GUIDE.md
+- FINAL_ANALYSIS_REPORT.md
+- FINAL_RESULTS_AND_NEXT_STEPS.md
+- IMPROVEMENTS_SUMMARY.md
+- IMPROVEMENT_SUMMARY.md
+- MA_STRATEGY_GUIDE.md
+- RUN_BACKTEST_INSTRUCTIONS.md
+- RUN_ELITE_SYSTEM.md
+- SYSTEM_OVERVIEW.md
+- WEEKLY_TRADING_UPDATE.md
+- COMPREHENSIVE_FINDINGS_AND_SOLUTION.md
+- QUICKSTART.md
+
+
+KEY FEATURES:
+✅ Clean directory structure
+✅ Logical module organization
+✅ Single comprehensive documentation (AutoBot.Md)
+✅ Professional naming conventions
+✅ Easy to navigate and maintain
+✅ Ready for production deployment
+✅ Git-friendly structure
+
+
+QUICK START:
+1. pip install -r requirements.txt
+2. python src/main.py --mode scan
+3. python src/main.py --mode backtest --stocks 50
+4. Read AutoBot.Md for complete documentation

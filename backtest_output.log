@@ -1,8 +1,0 @@
-Traceback (most recent call last):
-  File "/Users/santhoshbadam/Documents/development/git/WeAuto/run_backtest_and_fix.py", line 10, in <module>
-    from ultra_backtester_40y import UltraBacktester40Year
-  File "/Users/santhoshbadam/Documents/development/git/WeAuto/ultra_backtester_40y.py", line 21, in <module>
-    from worldclass_ml_system import WorldClassMLSystem
-  File "/Users/santhoshbadam/Documents/development/git/WeAuto/worldclass_ml_system.py", line 26, in <module>
-    from lightgbm import LGBMClassifier
-ModuleNotFoundError: No module named 'lightgbm'
