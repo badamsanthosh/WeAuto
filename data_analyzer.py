@@ -143,6 +143,19 @@ class DataAnalyzer:
             np.nan
         )
         
+        # RSI Overbought/Oversold signals
+        df['RSI_Overbought'] = (df['RSI'] >= config.RSI_OVERBOUGHT).astype(int)
+        df['RSI_Oversold'] = (df['RSI'] <= config.RSI_OVERSOLD).astype(int)
+        df['RSI_Neutral'] = ((df['RSI'] > config.RSI_OVERSOLD) & 
+                            (df['RSI'] < config.RSI_OVERBOUGHT)).astype(int)
+        
+        # RSI Signal (for intraday trading)
+        # Oversold = potential buy, Overbought = potential sell
+        df['RSI_Signal'] = np.where(
+            df['RSI'] <= config.RSI_OVERSOLD, 'OVERSOLD',
+            np.where(df['RSI'] >= config.RSI_OVERBOUGHT, 'OVERBOUGHT', 'NEUTRAL')
+        )
+        
         # MACD
         df['MACD'] = df['EMA_12'] - df['EMA_26']
         df['MACD_Signal'] = df['MACD'].ewm(span=9, adjust=False).mean()

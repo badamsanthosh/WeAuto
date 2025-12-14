@@ -16,19 +16,30 @@
 ## System Overview
 
 AutoBot is an automated trading system that:
+- **Discovers trending stocks** from multiple sources (Yahoo Finance, Moomoo, Twitter, Options, News)
 - Analyzes 40 years of historical market data
 - Uses Machine Learning (XGBoost/Random Forest) to predict stocks with 5% intraday gain potential
 - Implements 50/250 Moving Average strategy as primary filter
+- Analyzes volatility and volume for optimal intraday trading
+- Calculates probability of profit and conviction levels
 - Executes trades through Moomoo exchange with manual approval
 - Manages risk with stop-loss and take-profit mechanisms
+- Comprehensive testing framework (backtesting, forward testing, stress testing)
 
 **Key Features:**
-- ✅ 50/250 Moving Average Golden Cross Strategy
-- ✅ ML-based stock prediction
-- ✅ Real-time market data integration
-- ✅ Automated trade execution (with approval)
-- ✅ Risk management and position monitoring
-- ✅ Paper trading support (simulation mode)
+- ✅ **Multi-Source Stock Discovery** (Yahoo Finance, Moomoo, Twitter, Options, News)
+- ✅ **Volatility & Volume Analysis** for intraday trading optimization
+- ✅ **Probability & Conviction Scoring** (VERY_HIGH, HIGH, MEDIUM, LOW, VERY_LOW)
+- ✅ **50/250 Moving Average Golden Cross Strategy**
+- ✅ **RSI Overbought/Oversold Detection**
+- ✅ **ML-based stock prediction**
+- ✅ **Top 10 Trending Stocks** with ranking
+- ✅ **Top 5 Trading Suggestions** with entry points and profit targets
+- ✅ **Real-time market data integration**
+- ✅ **Automated trade execution** (with approval)
+- ✅ **Risk management and position monitoring**
+- ✅ **Paper trading support** (simulation mode)
+- ✅ **Comprehensive Testing Framework** (backtest, forward-test, stress-test)
 
 ---
 
@@ -352,9 +363,9 @@ POPULAR_TICKERS = [
 
 ## Running the Bot
 
-### Mode 1: Analysis Mode (Recommended First Run)
+### Mode 1: Enhanced Analysis Mode (Recommended First Run)
 
-**Purpose:** Get trade recommendations WITHOUT executing trades.
+**Purpose:** Get comprehensive trade recommendations with multi-source discovery WITHOUT executing trades.
 
 **Command:**
 ```bash
@@ -362,11 +373,34 @@ python main.py --mode analyze
 ```
 
 **What It Does:**
-1. Connects to Moomoo API (if available)
-2. Analyzes 40 years of historical data
-3. Trains ML model on historical patterns
-4. Evaluates stocks using 50/250 MA strategy
-5. Generates trade recommendations
+1. **Multi-Source Stock Discovery:**
+   - Discovers trending stocks from Yahoo Finance
+   - Gets top stocks from Moomoo
+   - Analyzes Twitter/X trending mentions
+   - Identifies unusual options activity
+   - Scans financial news for trending stocks
+   
+2. **Volatility & Volume Analysis:**
+   - Ranks stocks by intraday volatility
+   - Analyzes volume patterns and liquidity
+   - Identifies stocks with optimal volatility for intraday trading
+   
+3. **Probability & Conviction Scoring:**
+   - Calculates probability of profit using ML models
+   - Evaluates 50/250 MA strategy alignment
+   - Analyzes technical indicators (RSI, MACD, Bollinger Bands)
+   - Assigns conviction levels (VERY_HIGH, HIGH, MEDIUM, LOW, VERY_LOW)
+   
+4. **Top 10 Trending Stocks:**
+   - Displays top 10 stocks sorted by volatility and volume
+   - Shows probability and conviction for each
+   
+5. **Top 5 Trading Suggestions:**
+   - Selects best 5 stocks from top 10
+   - Provides entry points and profit targets (2%, 3%, 5%)
+   - Shows stop-loss levels
+   - Displays maximum profit potential
+   
 6. **Does NOT execute any trades**
 
 **Expected Output:**
@@ -529,6 +563,42 @@ python main.py --mode trade --auto-approve
 
 ## Understanding Output
 
+### Enhanced Analysis Output
+
+**Multi-Source Discovery:**
+```
+Discovery Results:
+  Yahoo Finance: 15 stocks
+  Moomoo: 10 stocks
+  Twitter: 10 stocks
+  Unusual Options: 8 stocks
+  News: 7 stocks
+```
+
+**Top 10 Trending Stocks:**
+```
+1. AAPL | Vol Score: 85.2 | Vol_Vol Score: 92.1 | Combined: 88.1
+2. TSLA | Vol Score: 78.5 | Vol_Vol Score: 88.3 | Combined: 82.4
+```
+
+**Probability & Conviction:**
+```
+AAPL | Probability: 82.50% | Conviction: 🔥 VERY_HIGH | ML: HIGH | MA: STRONG_BUY
+TSLA | Probability: 75.30% | Conviction: ✅ HIGH | ML: MEDIUM | MA: BUY
+```
+
+**Top 5 Trading Suggestions:**
+```
+1. AAPL
+   Current Price: $185.50
+   Entry Price: $185.13
+   Stop Loss: $181.79
+   Targets: 2%=$188.83 | 3%=$190.68 | 5%=$194.38
+   Max Profit Potential: 5.00%
+   Probability: 82.50%
+   Conviction: VERY_HIGH
+```
+
 ### Market Trend Analysis
 
 ```
@@ -540,6 +610,7 @@ SPY: BULL market, ✅ Golden Cross, MA Separation: 2.15%, RSI: 58.23
 - **✅ Golden Cross**: 50-day MA is above 250-day MA (bullish)
 - **MA Separation**: Percentage difference between MAs (higher = stronger trend)
 - **RSI**: Relative Strength Index (30-70 is normal range)
+- **RSI Signal**: OVERSOLD (≤30), NEUTRAL (30-70), OVERBOUGHT (≥70)
 
 ### Trade Recommendation Breakdown
 
@@ -869,7 +940,7 @@ Track your trades:
 # Test connection
 python test_connection.py
 
-# Analysis mode (no trades)
+# Enhanced analysis mode (no trades)
 python main.py --mode analyze
 
 # Trade mode (with approval)
@@ -878,9 +949,33 @@ python main.py --mode trade
 # Monitor positions
 python main.py --mode monitor
 
+# Backtest strategy
+python main.py --mode backtest --tickers AAPL MSFT --start-date 2024-01-01 --end-date 2024-12-31
+
+# Comprehensive testing
+python main.py --mode test --tickers AAPL MSFT GOOGL
+
+# Forward testing
+python main.py --mode forward-test --tickers AAPL MSFT
+
+# Stress testing
+python main.py --mode stress-test --tickers AAPL
+
 # Auto-approve (⚠️ dangerous)
 python main.py --mode trade --auto-approve
 ```
+
+### Execution Modes Summary
+
+| Mode | Command | Purpose |
+|------|---------|---------|
+| **analyze** | `--mode analyze` | Enhanced multi-source analysis with top 10 trending and top 5 suggestions |
+| **trade** | `--mode trade` | Execute trades with manual approval |
+| **monitor** | `--mode monitor` | Monitor existing positions |
+| **backtest** | `--mode backtest --tickers TICKER --start-date DATE --end-date DATE` | Historical backtesting |
+| **test** | `--mode test --tickers TICKER` | Comprehensive testing (backtest + forward + stress) |
+| **forward-test** | `--mode forward-test --tickers TICKER` | Out-of-sample forward testing |
+| **stress-test** | `--mode stress-test --tickers TICKER` | Stress testing under extreme conditions |
 
 ### Configuration Files
 
