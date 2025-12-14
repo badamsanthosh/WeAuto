@@ -1,0 +1,41 @@
+{
+  "analysis": {
+    "total_failed": 24,
+    "avg_loss_pct": -7.947027408167629,
+    "median_loss_pct": -8.898350290309892,
+    "max_loss_pct": -17.708333333333336,
+    "exit_reasons": {
+      "stop_loss": 13,
+      "max_holding_forced": 11
+    },
+    "avg_holding_days": 5.291666666666667,
+    "avg_entry_score": 94.70833333333333
+  },
+  "total_failures": 24,
+  "recommendations": [
+    {
+      "title": "Widen Adaptive Stop Loss by 0.5%",
+      "impact": "Reduce false stops (54% of failures)",
+      "action": "Increase stop loss buffer in high volatility",
+      "priority": "HIGH"
+    },
+    {
+      "title": "Implement Market Regime Filter",
+      "impact": "Expected 5-8% win rate improvement",
+      "action": "Only trade when SPY > 200MA and VIX < 25",
+      "priority": "HIGH"
+    },
+    {
+      "title": "Increase Volume Threshold to 1.2x",
+      "impact": "Expected 2-3% win rate improvement",
+      "action": "Require minimum 1.2x average volume",
+      "priority": "MEDIUM"
+    },
+    {
+      "title": "Tighten RSI Range to 40-60",
+      "impact": "Expected 2-4% win rate improvement",
+      "action": "Only enter when RSI between 40-60 (not 40-65)",
+      "priority": "MEDIUM"
+    }
+  ]
+}

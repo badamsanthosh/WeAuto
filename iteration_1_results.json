@@ -1,0 +1,30 @@
+{
+  "iteration": 1,
+  "timestamp": "2025-12-15T03:56:59.853968",
+  "config": {
+    "entry_score_threshold": 90.0,
+    "stop_loss_low_vol": 8.0,
+    "stop_loss_med_vol": 10.0,
+    "stop_loss_high_vol": 12.0,
+    "min_volume_ratio": 1.8,
+    "momentum_min": 4.0,
+    "momentum_max": 6.0,
+    "rsi_min": 40,
+    "rsi_max": 60,
+    "use_market_regime": false,
+    "target_min_pct": 8.0,
+    "target_mid_pct": 12.0,
+    "target_max_pct": 15.0
+  },
+  "summary": {
+    "tickers_tested": 8,
+    "total_trades": 10,
+    "total_winning_trades": 5,
+    "total_losing_trades": 5,
+    "overall_win_rate": 50.0,
+    "avg_entry_score": 92.6875,
+    "profit_factor": 1.688758010356855
+  },
+  "num_failed_trades": 5,
+  "num_successful_trades": 5
+}

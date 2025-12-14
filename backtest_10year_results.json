@@ -1,0 +1,67 @@
+{
+  "results": {
+    "AAPL": {
+      "ticker": "AAPL",
+      "start_date": "2015-12-18",
+      "end_date": "2025-12-15",
+      "initial_capital": 10000,
+      "final_capital": 18187.205806732178,
+      "total_return": 8187.205806732178,
+      "total_return_pct": 81.87205806732177,
+      "num_trades": 369,
+      "winning_trades": 227,
+      "losing_trades": 142,
+      "win_rate": 61.517615176151764,
+      "avg_win": 133.30521197886193,
+      "avg_loss": -155.44420642584143,
+      "avg_win_pct": 2.4824060683625335,
+      "avg_loss_pct": -2.621863602836173,
+      "max_win": 626.5809173583984,
+      "max_loss": -736.1422576904297,
+      "max_win_pct": 10.646402650798354,
+      "max_loss_pct": -9.912028951163927,
+      "profit_factor": 1.3709136560721906,
+      "avg_holding_days": 4.7073170731707314,
+      "exit_reasons": {
+        "end_of_week": 279,
+        "take_profit_min_eow": 22,
+        "stop_loss": 60,
+        "take_profit_target": 6,
+        "take_profit_max": 2
+      },
+      "trades": [
+        {
+          "ticker": "AAPL",
+          "entry_date": "2016-12-15",
+          "exit_date": "2016-12-21",
+          "entry_price": 26.694820404052734,
+          "exit_price": 26.98062515258789,
+          "shares": 187,
+          "profit": 53.44548797607422,
+          "profit_pct": 1.070637465280591,
+          "days_held": 5,
+          "exit_reason": "end_of_week",
+          "entry_score": 68.5,
+          "entry_indicators": {
+            "rsi": 67.50637184238812,
+            "weekly_rsi": 87.00012247640674,
+            "macd": 0.21383382830041597,
+            "weekly_momentum": 3.3000149239784893,
+            "ma_separation": 9.144345328503304,
+            "volume_ratio": 1.5295372348102416,
+            "weekly_volatility": 2.2146032067381087,
+            "swing_strength": 0.7,
+            "price": 26.694820404052734
+          },
+          "exit_indicators": {
+            "rsi": 86.219990132983,
+            "weekly_rsi": NaN,
+            "macd": 0.3485735541306454,
+            "weekly_momentum": 1.6234325566706342,
+            "ma_separation": 9.12286997177546,
+            "volume_ratio": 0.7741988827710378,
+            "weekly_volatility": 0.5101146738268315,
+            "swing_strength": 0.5,
+            "price": 26.98062515258789
+          },
+          "success": 
