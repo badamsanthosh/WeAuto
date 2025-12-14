@@ -164,3 +164,4 @@ This will rank stocks purely by ML probability without MA filtering.
 
 **The 50/250 MA strategy is now the PRIMARY filter for all trade recommendations, ensuring optimal profitability through proven trend-following methodology.**
 
+

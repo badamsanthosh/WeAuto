@@ -90,16 +90,31 @@ class DataAnalyzer:
         df['Price_Above_MA50'] = (df['Close'] > df['SMA_50']).astype(int)
         df['Price_Above_MA250'] = (df['Close'] > df['SMA_250']).astype(int)
         
-        # Distance from MAs (percentage)
-        df['Distance_From_MA50'] = ((df['Close'] - df['SMA_50']) / df['SMA_50']) * 100
-        df['Distance_From_MA250'] = ((df['Close'] - df['SMA_250']) / df['SMA_250']) * 100
+        # Distance from MAs (percentage) - handle division by zero
+        df['Distance_From_MA50'] = np.where(
+            df['SMA_50'] != 0,
+            ((df['Close'] - df['SMA_50']) / df['SMA_50']) * 100,
+            np.nan
+        )
+        df['Distance_From_MA250'] = np.where(
+            df['SMA_250'] != 0,
+            ((df['Close'] - df['SMA_250']) / df['SMA_250']) * 100,
+            np.nan
+        )
         
-        # MA Separation (strength of trend)
-        df['MA_Separation'] = ((df['SMA_50'] - df['SMA_250']) / df['SMA_250']) * 100
+        # MA Separation (strength of trend) - handle division by zero
+        df['MA_Separation'] = np.where(
+            df['SMA_250'] != 0,
+            ((df['SMA_50'] - df['SMA_250']) / df['SMA_250']) * 100,
+            np.nan
+        )
         
-        # MA Slopes (momentum indicators)
+        # MA Slopes (momentum indicators) - replace inf with NaN
         df['MA50_Slope'] = df['SMA_50'].pct_change(5) * 100  # 5-day slope
+        df['MA50_Slope'] = df['MA50_Slope'].replace([np.inf, -np.inf], np.nan)
+        
         df['MA250_Slope'] = df['SMA_250'].pct_change(20) * 100  # 20-day slope
+        df['MA250_Slope'] = df['MA250_Slope'].replace([np.inf, -np.inf], np.nan)
         
         # Recent crossover detection
         df['MA_Crossover_Recent'] = 0
@@ -117,12 +132,16 @@ class DataAnalyzer:
             (df['MA50_Slope'] > 0).astype(int) * 0.15
         )
         
-        # RSI
+        # RSI - handle division by zero
         delta = df['Close'].diff()
         gain = (delta.where(delta > 0, 0)).rolling(window=14).mean()
         loss = (-delta.where(delta < 0, 0)).rolling(window=14).mean()
-        rs = gain / loss
-        df['RSI'] = 100 - (100 / (1 + rs))
+        rs = np.where(loss != 0, gain / loss, np.nan)
+        df['RSI'] = np.where(
+            ~np.isnan(rs) & (rs != -1),
+            100 - (100 / (1 + rs)),
+            np.nan
+        )
         
         # MACD
         df['MACD'] = df['EMA_12'] - df['EMA_26']
@@ -135,19 +154,45 @@ class DataAnalyzer:
         df['BB_Upper'] = df['BB_Middle'] + (bb_std * 2)
         df['BB_Lower'] = df['BB_Middle'] - (bb_std * 2)
         df['BB_Width'] = df['BB_Upper'] - df['BB_Lower']
-        df['BB_Position'] = (df['Close'] - df['BB_Lower']) / (df['BB_Upper'] - df['BB_Lower'])
         
-        # Volume indicators
+        # BB_Position - handle division by zero
+        bb_range = df['BB_Upper'] - df['BB_Lower']
+        df['BB_Position'] = np.where(
+            bb_range != 0,
+            (df['Close'] - df['BB_Lower']) / bb_range,
+            np.nan
+        )
+        df['BB_Position'] = df['BB_Position'].replace([np.inf, -np.inf], np.nan)
+        
+        # Volume indicators - handle division by zero
         df['Volume_SMA'] = df['Volume'].rolling(window=20).mean()
-        df['Volume_Ratio'] = df['Volume'] / df['Volume_SMA']
+        df['Volume_Ratio'] = np.where(
+            df['Volume_SMA'] != 0,
+            df['Volume'] / df['Volume_SMA'],
+            np.nan
+        )
+        df['Volume_Ratio'] = df['Volume_Ratio'].replace([np.inf, -np.inf], np.nan)
         
-        # Price change indicators
+        # Price change indicators - replace inf with NaN
         df['Daily_Return'] = df['Close'].pct_change()
-        df['Volatility'] = df['Daily_Return'].rolling(window=20).std() * np.sqrt(252)
+        df['Daily_Return'] = df['Daily_Return'].replace([np.inf, -np.inf], np.nan)
         
-        # Intraday range
-        df['Intraday_Range'] = (df['High'] - df['Low']) / df['Close']
-        df['Intraday_Gain'] = (df['Close'] - df['Open']) / df['Open'] * 100
+        df['Volatility'] = df['Daily_Return'].rolling(window=20).std() * np.sqrt(252)
+        df['Volatility'] = df['Volatility'].replace([np.inf, -np.inf], np.nan)
+        
+        # Intraday range - handle division by zero
+        df['Intraday_Range'] = np.where(
+            df['Close'] != 0,
+            (df['High'] - df['Low']) / df['Close'],
+            np.nan
+        )
+        
+        df['Intraday_Gain'] = np.where(
+            df['Open'] != 0,
+            (df['Close'] - df['Open']) / df['Open'] * 100,
+            np.nan
+        )
+        df['Intraday_Gain'] = df['Intraday_Gain'].replace([np.inf, -np.inf], np.nan)
         
         # Target: 5% intraday gain
         df['Target_Hit'] = (df['Intraday_Gain'] >= 5.0).astype(int)

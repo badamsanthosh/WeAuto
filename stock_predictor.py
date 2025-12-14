@@ -63,10 +63,15 @@ class StockPredictor:
                 data[f'{col}_lag1'] = data[col].shift(1)
                 data[f'{col}_lag2'] = data[col].shift(2)
         
-        # Add momentum features
+        # Add momentum features - replace inf with NaN
         data['Price_Momentum_5'] = data['Close'].pct_change(5)
+        data['Price_Momentum_5'] = data['Price_Momentum_5'].replace([np.inf, -np.inf], np.nan)
+        
         data['Price_Momentum_10'] = data['Close'].pct_change(10)
+        data['Price_Momentum_10'] = data['Price_Momentum_10'].replace([np.inf, -np.inf], np.nan)
+        
         data['Volume_Momentum'] = data['Volume'].pct_change(5)
+        data['Volume_Momentum'] = data['Volume_Momentum'].replace([np.inf, -np.inf], np.nan)
         
         # Add all lagged features to feature list
         all_features = feature_cols + [f'{col}_lag1' for col in feature_cols] + \
@@ -82,10 +87,61 @@ class StockPredictor:
         if len(data) == 0:
             return pd.DataFrame(), pd.Series()
         
-        X = data[available_features]
+        X = data[available_features].copy()
         y = data['Target_Hit']  # Binary: 1 if 5%+ gain, 0 otherwise
         
+        # Clean infinity and extreme values
+        X = self._clean_features(X)
+        
+        # Remove rows with NaN after cleaning
+        mask = ~(X.isna().any(axis=1) | y.isna())
+        X = X[mask]
+        y = y[mask]
+        
+        if len(X) == 0:
+            return pd.DataFrame(), pd.Series()
+        
         return X, y
+    
+    def _clean_features(self, X: pd.DataFrame) -> pd.DataFrame:
+        """
+        Clean features by handling infinity and extreme values
+        
+        Args:
+            X: Feature DataFrame
+            
+        Returns:
+            Cleaned DataFrame
+        """
+        X_clean = X.copy()
+        
+        # Replace infinity with NaN
+        X_clean = X_clean.replace([np.inf, -np.inf], np.nan)
+        
+        # Clip extreme values to reasonable ranges for each column
+        for col in X_clean.columns:
+            if X_clean[col].dtype in [np.float64, np.float32, np.int64, np.int32]:
+                # Get non-null values
+                non_null = X_clean[col].dropna()
+                
+                if len(non_null) > 0:
+                    # Calculate percentiles to identify outliers
+                    q1 = non_null.quantile(0.01)
+                    q99 = non_null.quantile(0.99)
+                    
+                    # Clip values to reasonable range
+                    # Use wider range if data is already extreme
+                    if abs(q1) > 1e6 or abs(q99) > 1e6:
+                        # For very large values, clip to ±1e6
+                        X_clean[col] = X_clean[col].clip(lower=-1e6, upper=1e6)
+                    else:
+                        # For normal ranges, clip to 5x the IQR
+                        iqr = q99 - q1
+                        lower_bound = q1 - 5 * iqr
+                        upper_bound = q99 + 5 * iqr
+                        X_clean[col] = X_clean[col].clip(lower=lower_bound, upper=upper_bound)
+        
+        return X_clean
     
     def train_model(self, tickers: List[str]) -> bool:
         """
@@ -122,6 +178,10 @@ class StockPredictor:
         X_combined = pd.concat(all_X, ignore_index=True)
         y_combined = pd.concat(all_y, ignore_index=True)
         
+        # Clean infinity and extreme values from combined data
+        print("Cleaning features (removing infinity and extreme values)...")
+        X_combined = self._clean_features(X_combined)
+        
         # Remove any remaining NaN values
         mask = ~(X_combined.isna().any(axis=1) | y_combined.isna())
         X_combined = X_combined[mask]
@@ -131,14 +191,45 @@ class StockPredictor:
             print("No valid data after cleaning")
             return False
         
+        print(f"Training data shape: {X_combined.shape}")
+        print(f"Features with infinity: {(X_combined == np.inf).sum().sum()}")
+        print(f"Features with -infinity: {(X_combined == -np.inf).sum().sum()}")
+        print(f"Features with NaN: {X_combined.isna().sum().sum()}")
+        
         # Split data
         X_train, X_test, y_train, y_test = train_test_split(
             X_combined, y_combined, test_size=0.2, random_state=42, stratify=y_combined
         )
         
-        # Scale features
-        X_train_scaled = self.scaler.fit_transform(X_train)
-        X_test_scaled = self.scaler.transform(X_test)
+        # Scale features - handle any remaining issues
+        try:
+            X_train_scaled = self.scaler.fit_transform(X_train)
+            X_test_scaled = self.scaler.transform(X_test)
+        except ValueError as e:
+            print(f"Error scaling features: {e}")
+            print("Checking for problematic values...")
+            
+            # Check for infinity
+            inf_mask = np.isinf(X_train).any(axis=1)
+            if inf_mask.any():
+                print(f"Found {inf_mask.sum()} rows with infinity in training data")
+                X_train = X_train[~inf_mask]
+                y_train = y_train[~inf_mask]
+            
+            # Check for extremely large values
+            large_mask = (np.abs(X_train) > 1e10).any(axis=1)
+            if large_mask.any():
+                print(f"Found {large_mask.sum()} rows with extremely large values")
+                X_train = X_train[~large_mask]
+                y_train = y_train[~large_mask]
+            
+            # Try scaling again
+            if len(X_train) > 0:
+                X_train_scaled = self.scaler.fit_transform(X_train)
+                X_test_scaled = self.scaler.transform(X_test)
+            else:
+                print("No valid training data after cleaning")
+                return False
         
         # Train model
         if self.model_type == 'xgboost':
