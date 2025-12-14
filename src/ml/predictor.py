@@ -13,9 +13,9 @@ from typing import List, Dict, Tuple, Optional
 import warnings
 warnings.filterwarnings('ignore')
 
-from data_analyzer import DataAnalyzer
-from ma_strategy import MAStrategy
-import config
+from core.data_analyzer import DataAnalyzer
+from strategies.ma_strategy import MAStrategy
+from core import config
 
 class StockPredictor:
     """ML-based stock predictor for WEEKLY swing trading gains (5-10%)"""

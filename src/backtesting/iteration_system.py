@@ -11,9 +11,9 @@ import pandas as pd
 import numpy as np
 warnings.filterwarnings('ignore')
 
-from sp500_fetcher import SP500Fetcher
-from elite_backtester_95pct import EliteBacktester95
-from elite_ml_system_95pct import EliteMLSystem95
+from utils.sp500_fetcher import SP500Fetcher
+from backtesting.elite_backtester import EliteBacktester95
+from ml.elite_ml_model import EliteMLSystem95
 
 
 class AutomatedIterationSystem:

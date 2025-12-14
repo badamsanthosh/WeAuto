@@ -81,17 +81,16 @@ def run_scan(args):
     print("="*80)
     
     scanner = StockDiscovery()
-    opportunities = scanner.scan_for_opportunities()
+    # Get trending stocks from multiple sources
+    trending = scanner.get_combined_trending(min_sources=1)
     
-    if opportunities:
-        print(f"\n✅ Found {len(opportunities)} opportunities:")
-        for i, opp in enumerate(opportunities[:10], 1):
-            print(f"\n{i}. {opp['ticker']}")
-            print(f"   Score: {opp['score']:.1f}/100")
-            print(f"   Price: ${opp['price']:.2f}")
-            print(f"   Target: ${opp['target']:.2f} ({opp['gain_pct']:.1f}%)")
+    if trending:
+        print(f"\n✅ Found {len(trending)} trending stocks:")
+        for i, ticker in enumerate(trending[:10], 1):
+            print(f"   {i}. {ticker}")
+        print(f"\n💡 Use these tickers for further analysis")
     else:
-        print("\n⚠️  No opportunities found at this time")
+        print("\n⚠️  No trending stocks found at this time")
 
 
 def main():

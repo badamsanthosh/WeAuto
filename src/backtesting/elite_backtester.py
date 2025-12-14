@@ -18,8 +18,8 @@ import json
 from concurrent.futures import ThreadPoolExecutor, as_completed
 warnings.filterwarnings('ignore')
 
-from data_analyzer import DataAnalyzer
-import config
+from core.data_analyzer import DataAnalyzer
+from core import config
 
 class EliteBacktester95:
     """

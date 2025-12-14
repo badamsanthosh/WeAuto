@@ -9,11 +9,11 @@ from datetime import datetime, timedelta
 import warnings
 warnings.filterwarnings('ignore')
 
-from data_analyzer import DataAnalyzer
+from core.data_analyzer import DataAnalyzer
 from stock_predictor import StockPredictor
 from ma_strategy import MAStrategy
 from probability_scorer import ProbabilityScorer
-import config
+from core import config
 
 class Backtester:
     """Comprehensive testing framework for trading strategies"""

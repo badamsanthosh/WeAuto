@@ -19,14 +19,14 @@ CONFIGURATION B PARAMETERS:
 - Holding: Up to 10 trading days (2 weeks)
 """
 
-from elite_backtester_95pct import EliteBacktester95
+from backtesting.elite_backtester import EliteBacktester95
 import pandas as pd
 import numpy as np
 from typing import Dict, List, Tuple
 from datetime import datetime, timedelta
 from concurrent.futures import ThreadPoolExecutor, as_completed
-import config
-from data_analyzer import DataAnalyzer
+from core import config
+from core.data_analyzer import DataAnalyzer
 
 
 class RealisticEliteBacktester(EliteBacktester95):

@@ -10,9 +10,9 @@ from stock_discovery import StockDiscovery
 from volatility_analyzer import VolatilityAnalyzer
 from probability_scorer import ProbabilityScorer
 from stock_predictor import StockPredictor
-from data_analyzer import DataAnalyzer
+from core.data_analyzer import DataAnalyzer
 from news_sentiment_analyzer import NewsSentimentAnalyzer
-import config
+from core import config
 
 class EnhancedAnalyzer:
     """Enhanced analysis with multi-source discovery and ranking for WEEKLY SWING TRADING"""

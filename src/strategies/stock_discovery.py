@@ -12,7 +12,7 @@ import time
 import warnings
 warnings.filterwarnings('ignore')
 
-import config
+from core import config
 
 class StockDiscovery:
     """Discovers trending stocks from multiple sources"""

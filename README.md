@@ -20,11 +20,17 @@ Professional-grade automated trading system with ML-based predictions and 40-yea
 # Install dependencies
 pip install -r requirements.txt
 
+# View help
+python3 run.py --help
+
+# Scan for opportunities
+python3 run.py --mode scan
+
 # Run backtest on 50 stocks (~5 minutes)
-python src/ml/realistic_system.py --stocks 50
+python3 run.py --mode backtest --stocks 50
 
 # Run optimized system on 500 stocks (~2 hours)
-python src/ml/optimized_system.py --stocks 500
+python3 run.py --mode backtest --config optimized --stocks 500
 ```
 
 ## 📖 Full Documentation

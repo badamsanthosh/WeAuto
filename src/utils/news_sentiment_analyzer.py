@@ -23,7 +23,7 @@ except ImportError:
         VADER_AVAILABLE = False
         TEXTBLOB_AVAILABLE = False
 
-import config
+from core import config
 
 
 class NewsSentimentAnalyzer:

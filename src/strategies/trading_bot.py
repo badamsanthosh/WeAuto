@@ -7,11 +7,11 @@ from datetime import datetime
 from typing import List, Dict, Optional
 import sys
 
-from data_analyzer import DataAnalyzer
-from stock_predictor import StockPredictor
-from moomoo_integration import MoomooIntegration
-from risk_manager import RiskManager
-import config
+from core.data_analyzer import DataAnalyzer
+from ml.predictor import StockPredictor
+from utils.moomoo_integration import MoomooIntegration
+from core.risk_manager import RiskManager
+from core import config
 
 class TradingBot:
     """Main automated trading bot"""

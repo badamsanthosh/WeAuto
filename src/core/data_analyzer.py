@@ -10,7 +10,7 @@ import os
 import pickle
 from typing import List, Dict, Optional
 import warnings
-import config
+import core.config as config
 warnings.filterwarnings('ignore')
 
 class DataAnalyzer:

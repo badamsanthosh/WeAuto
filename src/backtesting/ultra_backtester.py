@@ -17,12 +17,12 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 import warnings
 warnings.filterwarnings('ignore')
 
-from data_analyzer import DataAnalyzer
+from core.data_analyzer import DataAnalyzer
 try:
-    from simplified_ml_system import SimplifiedMLSystem as WorldClassMLSystem
+    # from ml.realistic_system import RealisticEliteBacktester as WorldClassMLSystem
 except:
     WorldClassMLSystem = None
-import config
+from core import config
 
 class UltraBacktester40Year:
     """

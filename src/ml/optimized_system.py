@@ -16,14 +16,14 @@ EXPECTED PERFORMANCE (500 stocks, 40 years):
 - Annual Return: 40-60%
 """
 
-from realistic_elite_system import RealisticEliteBacktester
+from ml.realistic_system import RealisticEliteBacktester
 import pandas as pd
 import numpy as np
 from typing import Dict, List, Tuple
 from datetime import datetime, timedelta
 from concurrent.futures import ThreadPoolExecutor, as_completed
-import config
-from data_analyzer import DataAnalyzer
+from core import config
+from core.data_analyzer import DataAnalyzer
 
 
 class FinalOptimizedSystem(RealisticEliteBacktester):

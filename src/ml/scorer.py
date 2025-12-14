@@ -8,11 +8,11 @@ import numpy as np
 from typing import Dict, Optional
 from datetime import datetime
 
-from data_analyzer import DataAnalyzer
+from core.data_analyzer import DataAnalyzer
 from stock_predictor import StockPredictor
 from ma_strategy import MAStrategy
-from volatility_analyzer import VolatilityAnalyzer
-import config
+from utils.volatility_analyzer import VolatilityAnalyzer
+from core import config
 
 class ProbabilityScorer:
     """Calculates probability of profit and conviction level for weekly swing trading"""

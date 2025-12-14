@@ -3,7 +3,7 @@ Risk Management Module
 Handles position sizing, stop-loss, take-profit, and risk controls
 """
 from typing import Dict, Optional
-import config
+import core.config as config
 
 class RiskManager:
     """Manages trading risk and position sizing"""
