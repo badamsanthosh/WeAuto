@@ -82,9 +82,17 @@ WeAuto is a professional-grade automated trading system that combines **machine 
 #### 7. **iMessage Notifications** 📱
 - **Instant Alerts**: Receive predictions via Apple iMessage
 - **Trade Notifications**: Get notified when trades are executed
-- **Configurable Recipients**: Use Apple ID or phone number
+- **Configurable Recipients**: Use Apple ID or phone number (multiple recipients supported)
 - **Rich Formatting**: Detailed prediction data in messages
 - **macOS Integration**: Native AppleScript integration
+
+#### 8. **Desktop Application** 🖥️
+- **Modern GUI**: Intuitive desktop interface built with tkinter
+- **Start/Stop Controls**: Simple application lifecycle management
+- **iMessage Monitoring**: Automatically detects stock tickers from clipboard
+- **Real-time Activity Log**: See all predictions and activities in real-time
+- **Manual Predictions**: Enter tickers directly for instant analysis
+- **Automatic Integration**: Seamlessly integrates with iMessage notifications
 
 ---
 
@@ -203,10 +211,22 @@ HOLDING_PERIOD_DAYS = 5             # Hold for 5 days (1 week)
 TRADING_ENV = 'SIMULATE'            # Use 'REAL' for live trading
 ```
 
-### Step 5: Verify Installation
+### Step 5: Install Desktop App Dependencies (Optional)
+
+For the desktop application with clipboard monitoring:
 
 ```bash
-python src/main.py --help
+pip install pyperclip
+```
+
+### Step 6: Verify Installation
+
+```bash
+# Verify command-line interface
+python3 run.py --help
+
+# Or start the desktop application
+python3 desktop.py
 ```
 
 ---
@@ -304,7 +324,54 @@ python3 -c "import sys; sys.path.insert(0, 'src'); from utils.imessage_notifier 
 
 ## 📖 Usage Guide
 
-### Basic Usage
+### Desktop Application (Recommended)
+
+#### Start the Desktop GUI
+
+The easiest way to use WeAuto is through the desktop application:
+
+```bash
+# Start the desktop application
+python3 desktop.py
+```
+
+**Features:**
+- ✅ **Intuitive GUI** - Modern, easy-to-use interface
+- ✅ **Start/Stop Controls** - Simple button controls
+- ✅ **iMessage Monitoring** - Automatically detects stock tickers from clipboard
+- ✅ **Manual Predictions** - Enter tickers directly
+- ✅ **Activity Log** - Real-time log of all activities
+- ✅ **Automatic Notifications** - Sends iMessage alerts when predictions are made
+
+**How to Use:**
+
+1. **Start the Application:**
+   ```bash
+   python3 desktop.py
+   ```
+
+2. **Start Monitoring:**
+   - Click the **▶ Start** button
+   - Application begins monitoring clipboard for stock tickers
+
+3. **Trigger Predictions:**
+   - **Method 1 (Automatic)**: Copy text containing a stock ticker (e.g., "Check AAPL") to your clipboard
+   - **Method 2 (Manual)**: Enter a ticker in the "Stock Ticker" field and click "Predict"
+
+4. **Stop Monitoring:**
+   - Click the **⏹ Stop** button to stop monitoring
+
+**iMessage Integration:**
+- When a prediction is made, it automatically sends an iMessage notification (if configured)
+- Copy a message from iMessage containing a stock ticker, and the app will detect it
+- Example: Copy "What do you think about AAPL?" and the app will analyze AAPL
+
+**Requirements:**
+- macOS (for iMessage integration)
+- Messages app must be signed in
+- Optional: `pyperclip` for clipboard monitoring (`pip install pyperclip`)
+
+### Command Line Usage
 
 #### 1. Run Backtesting (Recommended First Step)
 
@@ -709,6 +776,32 @@ Set environment variables or `.env` file:
 - `IMESSAGE_PHONE=+12345678900` (single recipient, or)
 - `IMESSAGE_PHONE=+12345678900,+19876543210,+15551234567` (multiple recipients)
 
+#### Desktop Application (`src/gui/desktop_app.py`)
+
+```python
+from gui.desktop_app import WeAutoDesktopApp
+import tkinter as tk
+
+# Create and run desktop application
+root = tk.Tk()
+app = WeAutoDesktopApp(root)
+root.mainloop()
+```
+
+**Features:**
+- Modern GUI with dark theme
+- Start/Stop application controls
+- Clipboard monitoring for stock tickers
+- Manual ticker entry
+- Real-time activity logging
+- Automatic iMessage notifications
+
+**Usage:**
+```bash
+# Start desktop application
+python3 desktop.py
+```
+
 ---
 
 ## 🐛 Troubleshooting
@@ -760,7 +853,51 @@ Set environment variables or `.env` file:
    - **"Recipient not found"**: Add recipient to Contacts app
    - **"Permission denied"**: Grant automation permissions in System Preferences
 
-#### 2. **SSL Certificate Error**
+#### 2. **Desktop Application Issues**
+
+**Symptoms:**
+- Application won't start
+- Clipboard monitoring not working
+- GUI appears blank or unresponsive
+
+**Solutions:**
+
+1. **Install Dependencies:**
+   ```bash
+   pip install pyperclip
+   ```
+
+2. **Check Python Version:**
+   ```bash
+   python3 --version  # Should be 3.8 or higher
+   ```
+
+3. **Verify tkinter is installed:**
+   ```bash
+   python3 -c "import tkinter; print('tkinter OK')"
+   ```
+   
+   If tkinter is missing:
+   - **macOS**: Usually pre-installed
+   - **Linux**: `sudo apt-get install python3-tk` (Ubuntu/Debian)
+   - **Windows**: Usually pre-installed with Python
+
+4. **Clipboard Monitoring Not Working:**
+   - Install pyperclip: `pip install pyperclip`
+   - Grant clipboard access permissions (macOS: System Preferences → Security & Privacy)
+   - Try manual prediction instead (enter ticker directly)
+
+5. **Application Freezes:**
+   - Model training may take 1-2 minutes on first run
+   - Check Activity Log for status messages
+   - Ensure internet connection for data fetching
+
+6. **No Predictions Generated:**
+   - Check that model is trained (first run trains automatically)
+   - Verify ticker symbol is valid
+   - Check Activity Log for error messages
+
+#### 3. **SSL Certificate Error**
 
 ```
 <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED]>
@@ -788,7 +925,7 @@ pip install xgboost
 pip install -r requirements.txt
 ```
 
-#### 3. **Insufficient Data**
+#### 5. **Insufficient Data**
 
 ```
 error: 'Insufficient data'
@@ -799,7 +936,7 @@ error: 'Insufficient data'
 - Check if ticker symbol is correct
 - Try a different stock
 
-#### 4. **Memory Error**
+#### 6. **Memory Error**
 
 ```
 MemoryError: Unable to allocate array
@@ -810,7 +947,7 @@ MemoryError: Unable to allocate array
 - Close other applications
 - Increase system RAM
 
-#### 5. **Slow Performance**
+#### 7. **Slow Performance**
 
 **Solution:**
 - Use parallel processing: `parallel=True`

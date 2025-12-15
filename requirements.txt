@@ -24,6 +24,7 @@ lxml>=4.9.0
 # Utilities
 python-dotenv>=1.0.0
 joblib>=1.3.0
+pyperclip>=1.8.2  # For clipboard monitoring in desktop app
 
 # Optional: Additional ML libraries (install if needed)
 # lightgbm>=4.0.0
