@@ -15,7 +15,7 @@ warnings.filterwarnings('ignore')
 
 from core.data_analyzer import DataAnalyzer
 from strategies.ma_strategy import MAStrategy
-from core import config
+import core.config as config
 
 class StockPredictor:
     """ML-based stock predictor for WEEKLY swing trading gains (5-10%)"""

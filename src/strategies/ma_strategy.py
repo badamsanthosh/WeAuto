@@ -5,7 +5,7 @@ Implements 50-day and 250-day MA crossover strategy for optimal trade selection
 import pandas as pd
 import numpy as np
 from typing import Dict, Optional
-from core import config
+import core.config as config
 
 class MAStrategy:
     """50/250 Moving Average Crossover Strategy"""

@@ -13,7 +13,7 @@ from core.data_analyzer import DataAnalyzer
 from stock_predictor import StockPredictor
 from ma_strategy import MAStrategy
 from probability_scorer import ProbabilityScorer
-from core import config
+import core.config as config
 
 class Backtester:
     """Comprehensive testing framework for trading strategies"""

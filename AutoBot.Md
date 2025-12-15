@@ -1,7 +1,7 @@
 # 🤖 WeAuto - Elite Trading System
 
 **Version:** 1.0.0  
-**Author:** AutoBot Trading Systems  
+**Author:** Santhosh Badam  
 **Last Updated:** December 15, 2025
 
 ---

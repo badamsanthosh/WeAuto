@@ -35,7 +35,7 @@ import joblib
 warnings.filterwarnings('ignore')
 
 from core.data_analyzer import DataAnalyzer
-from core import config
+import core.config as config
 
 class EliteMLSystem95:
     """

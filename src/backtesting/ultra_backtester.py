@@ -22,7 +22,7 @@ try:
     # from ml.realistic_system import RealisticEliteBacktester as WorldClassMLSystem
 except:
     WorldClassMLSystem = None
-from core import config
+import core.config as config
 
 class UltraBacktester40Year:
     """

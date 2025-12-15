@@ -6,13 +6,13 @@ UPDATED FOR WEEKLY SWING TRADING STRATEGY
 from typing import List, Dict, Optional
 from datetime import datetime
 
-from stock_discovery import StockDiscovery
-from volatility_analyzer import VolatilityAnalyzer
-from probability_scorer import ProbabilityScorer
-from stock_predictor import StockPredictor
+from strategies.stock_discovery import StockDiscovery
+from utils.volatility_analyzer import VolatilityAnalyzer
+from ml.scorer import ProbabilityScorer
+from ml.predictor import StockPredictor
 from core.data_analyzer import DataAnalyzer
-from news_sentiment_analyzer import NewsSentimentAnalyzer
-from core import config
+from utils.news_sentiment_analyzer import NewsSentimentAnalyzer
+import core.config as config
 
 class EnhancedAnalyzer:
     """Enhanced analysis with multi-source discovery and ranking for WEEKLY SWING TRADING"""

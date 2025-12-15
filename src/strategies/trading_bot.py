@@ -11,7 +11,7 @@ from core.data_analyzer import DataAnalyzer
 from ml.predictor import StockPredictor
 from utils.moomoo_integration import MoomooIntegration
 from core.risk_manager import RiskManager
-from core import config
+import core.config as config
 
 class TradingBot:
     """Main automated trading bot"""

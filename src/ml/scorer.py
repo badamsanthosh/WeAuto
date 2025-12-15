@@ -12,7 +12,7 @@ from core.data_analyzer import DataAnalyzer
 from stock_predictor import StockPredictor
 from ma_strategy import MAStrategy
 from utils.volatility_analyzer import VolatilityAnalyzer
-from core import config
+import core.config as config
 
 class ProbabilityScorer:
     """Calculates probability of profit and conviction level for weekly swing trading"""

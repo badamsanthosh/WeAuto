@@ -11,7 +11,7 @@ import time
 import warnings
 warnings.filterwarnings('ignore')
 
-from core import config
+import core.config as config
 
 class VolatilityAnalyzer:
     """Analyzes volatility and volume for weekly swing trading"""

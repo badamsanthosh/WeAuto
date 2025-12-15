@@ -14,7 +14,7 @@ except ImportError:
 
 from typing import Dict, Optional, List, Tuple, Any
 import time
-from core import config
+import core.config as config
 
 class MoomooIntegration:
     """Integration with Moomoo trading platform"""

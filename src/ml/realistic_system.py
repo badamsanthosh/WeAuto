@@ -25,7 +25,7 @@ import numpy as np
 from typing import Dict, List, Tuple
 from datetime import datetime, timedelta
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from core import config
+import core.config as config
 from core.data_analyzer import DataAnalyzer
 
 

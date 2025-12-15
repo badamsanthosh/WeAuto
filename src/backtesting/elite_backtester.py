@@ -19,7 +19,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 warnings.filterwarnings('ignore')
 
 from core.data_analyzer import DataAnalyzer
-from core import config
+import core.config as config
 
 class EliteBacktester95:
     """

@@ -2,6 +2,20 @@
 Multi-Source Stock Discovery Module
 Discovers trending stocks from multiple sources: Yahoo Finance, Moomoo, Twitter, Options, News
 """
+import sys
+import os
+
+# Ensure src/ is in Python path for imports
+_current_dir = os.path.dirname(os.path.abspath(__file__))
+_src_dir = os.path.dirname(_current_dir)  # Go up from strategies/ to src/
+_project_root = os.path.dirname(_src_dir)  # Go up from src/ to project root
+
+# Add paths if not already present
+if _src_dir not in sys.path:
+    sys.path.insert(0, _src_dir)
+if _project_root not in sys.path:
+    sys.path.insert(0, _project_root)
+
 import yfinance as yf
 import pandas as pd
 import numpy as np
@@ -12,7 +26,7 @@ import time
 import warnings
 warnings.filterwarnings('ignore')
 
-from core import config
+import core.config as config
 
 class StockDiscovery:
     """Discovers trending stocks from multiple sources"""
