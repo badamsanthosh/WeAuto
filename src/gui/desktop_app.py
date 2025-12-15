@@ -2,13 +2,45 @@
 WeAuto Desktop Application
 Modern GUI for the WeAuto trading system with iMessage monitoring
 """
-import tkinter as tk
-from tkinter import ttk, scrolledtext, messagebox
+import sys
+import os
+
+# Check if tkinter is available (including _tkinter C extension)
+TKINTER_AVAILABLE = False
+try:
+    import tkinter as tk
+    from tkinter import ttk, scrolledtext, messagebox
+    # Test that _tkinter (C extension) is actually available
+    # by trying to create a root window
+    test_root = tk.Tk()
+    test_root.withdraw()  # Hide it immediately
+    test_root.destroy()
+    TKINTER_AVAILABLE = True
+except (ImportError, ModuleNotFoundError, AttributeError, tk.TclError) as e:
+    TKINTER_AVAILABLE = False
+    print("=" * 80)
+    print("ERROR: tkinter is not available")
+    print("=" * 80)
+    print(f"\nError details: {e}")
+    print("\nTo fix this issue, install tkinter:")
+    print("\n  macOS (Homebrew Python):")
+    print("    brew install python-tk")
+    print("    OR reinstall Python with: brew install python@3.11")
+    print("\n  macOS (System Python):")
+    print("    tkinter should be pre-installed")
+    print("\n  Linux (Ubuntu/Debian):")
+    print("    sudo apt-get install python3-tk")
+    print("\n  Linux (Fedora):")
+    print("    sudo dnf install python3-tkinter")
+    print("\nAlternatively, use the command-line interface:")
+    print("    python3 run.py --mode scan")
+    print("    python3 predict.py --tickers AAPL,MSFT,GOOGL")
+    print("\n" + "=" * 80)
+    sys.exit(1)
+
 import threading
 import time
 import re
-import sys
-import os
 from datetime import datetime
 from typing import Optional, List
 import subprocess

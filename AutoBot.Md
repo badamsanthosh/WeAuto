@@ -878,9 +878,25 @@ python3 desktop.py
    ```
    
    If tkinter is missing:
-   - **macOS**: Usually pre-installed
-   - **Linux**: `sudo apt-get install python3-tk` (Ubuntu/Debian)
+   - **macOS (Homebrew Python)**: 
+     ```bash
+     brew install python-tk
+     # OR use system Python instead:
+     /usr/bin/python3 desktop.py
+     ```
+   - **macOS (System Python)**: Usually pre-installed
+   - **Linux (Ubuntu/Debian)**: `sudo apt-get install python3-tk`
+   - **Linux (Fedora)**: `sudo dnf install python3-tkinter`
    - **Windows**: Usually pre-installed with Python
+   
+   **Quick Fix for macOS Homebrew Python:**
+   ```bash
+   # Option 1: Use system Python (has tkinter)
+   /usr/bin/python3 desktop.py
+   
+   # Option 2: Install tkinter for Homebrew Python
+   brew install python-tk
+   ```
 
 4. **Clipboard Monitoring Not Working:**
    - Install pyperclip: `pip install pyperclip`
