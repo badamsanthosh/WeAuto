@@ -11,6 +11,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
 
 # Import predictor
 from ml.predictor import StockPredictor
+from utils.imessage_notifier import iMessageNotifier
 import argparse
 
 if __name__ == '__main__':
@@ -26,6 +27,7 @@ if __name__ == '__main__':
     print(f"{'='*80}\n")
     
     predictor = StockPredictor()
+    notifier = iMessageNotifier()
     
     # Check if model needs training
     if predictor.model is None:
@@ -33,7 +35,7 @@ if __name__ == '__main__':
         print("   (This may take 1-2 minutes on first run)\n")
         
         # Use a mix of popular stocks for training
-        training_tickers = ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'TSLA', 'NVDA', 'META', 'JPM', 'JNJ', 'V']
+        training_tickers = ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'TSLA', 'NVDA', 'META', 'JPM', 'JNJ', 'V', 'NVTS', 'AMTM', 'TALK']
         
         # Add user's tickers to training set if not already included
         for ticker in tickers:
@@ -76,6 +78,14 @@ if __name__ == '__main__':
                     print(f"  RSI: {prediction['rsi']:.1f}")
                 if 'ma_signal' in prediction:
                     print(f"  MA Signal: {prediction.get('ma_signal', 'N/A')}")
+                
+                # Send iMessage notification if enabled
+                if notifier.enabled:
+                    try:
+                        notifier.send_prediction_notification(prediction)
+                        print(f"  📱 iMessage notification sent")
+                    except Exception as e:
+                        print(f"  ⚠️  Failed to send iMessage: {e}")
             else:
                 print(f"  ⚠️  Unable to generate prediction")
                 print(f"     Possible reasons:")

@@ -79,6 +79,13 @@ WeAuto is a professional-grade automated trading system that combines **machine 
 - **Technical Indicators**: RSI, MACD, Bollinger Bands
 - **Volume Analysis**: Institutional flow detection
 
+#### 7. **iMessage Notifications** 📱
+- **Instant Alerts**: Receive predictions via Apple iMessage
+- **Trade Notifications**: Get notified when trades are executed
+- **Configurable Recipients**: Use Apple ID or phone number
+- **Rich Formatting**: Detailed prediction data in messages
+- **macOS Integration**: Native AppleScript integration
+
 ---
 
 ## 🏗️ System Architecture
@@ -243,6 +250,56 @@ python src/main.py --help
 | `MODEL_TYPE` | `'xgboost'` | ML model type |
 | `MIN_CONFIDENCE_SCORE` | `0.7` | Min confidence threshold |
 
+#### iMessage Notifications
+
+| Parameter | Default | Description |
+|-----------|---------|-------------|
+| `IMESSAGE_ENABLED` | `False` | Enable iMessage notifications |
+| `IMESSAGE_APPLE_ID` | `''` | Recipient Apple ID (email) |
+| `IMESSAGE_PHONE` | `''` | Phone number(s) - comma-separated list (e.g., +1234567890,+19876543210) |
+
+**Configuration via Environment Variables:**
+
+Create a `.env` file in the project root:
+
+```bash
+# Enable iMessage notifications
+IMESSAGE_ENABLED=true
+
+# Use Apple ID (email address) - single recipient
+IMESSAGE_APPLE_ID=recipient@example.com
+
+# OR use phone number(s) - single or multiple (comma-separated)
+# Single recipient:
+IMESSAGE_PHONE=+12345678900
+
+# Multiple recipients (comma-separated):
+IMESSAGE_PHONE=+12345678900,+19876543210,+15551234567
+```
+
+**Important Notes:**
+- **Multiple Recipients**: `IMESSAGE_PHONE` supports comma-separated phone numbers
+- Phone numbers take precedence over Apple ID if both are set
+- All recipients must be in your macOS Contacts app
+- Messages app must be open and signed in to your Apple ID
+- Requires macOS with Messages app installed
+- Phone numbers should include country code (e.g., +1 for US)
+- Messages will be sent to all configured recipients simultaneously
+
+**Testing iMessage Configuration:**
+
+```python
+from utils.imessage_notifier import iMessageNotifier
+
+notifier = iMessageNotifier()
+notifier.test_connection()
+```
+
+Or via command line:
+```bash
+python3 -c "import sys; sys.path.insert(0, 'src'); from utils.imessage_notifier import iMessageNotifier; iMessageNotifier().test_connection()"
+```
+
 ---
 
 ## 📖 Usage Guide
@@ -277,6 +334,35 @@ python src/strategies/stock_discovery.py --scan
 
 # Get signals for specific stocks
 python src/ml/predictor.py --tickers AAPL,MSFT,GOOGL
+
+# Predictions will automatically send iMessage notifications if enabled
+```
+
+**With iMessage Notifications:**
+
+1. **Configure iMessage** (see Configuration section above)
+   - Single recipient: `IMESSAGE_PHONE=+12345678900`
+   - Multiple recipients: `IMESSAGE_PHONE=+12345678900,+19876543210`
+2. **Run predictions** - notifications are sent automatically to all recipients:
+   ```bash
+   python3 predict.py --tickers AAPL,MSFT,GOOGL
+   ```
+3. **Check your Messages app** - all configured recipients will receive formatted prediction alerts
+
+**Notification Format:**
+```
+📊 WeAutoBot Prediction Alert
+
+Ticker: AAPL
+Current Price: $175.50
+Signal: BUY
+Probability: 78.5%
+Confidence: HIGH
+Target: $188.66 (+7.5%)
+RSI: 45.2
+MA Signal: BULLISH
+
+🤖 WeAuto Trading System
 ```
 
 ### Advanced Usage
@@ -577,13 +663,104 @@ liquid_stocks = fetcher.get_top_liquid_stocks(limit=500)
 fetcher.save_symbols_to_file('sp500_symbols.txt')
 ```
 
+#### iMessage Notifier (`src/utils/imessage_notifier.py`)
+
+```python
+from utils.imessage_notifier import iMessageNotifier
+
+# Initialize notifier (reads config from environment)
+notifier = iMessageNotifier()
+
+# Test connection
+notifier.test_connection()
+
+# Send prediction notification
+prediction = {
+    'ticker': 'AAPL',
+    'current_price': 175.50,
+    'probability': 0.785,
+    'prediction': True,  # BUY signal
+    'confidence': 'HIGH',
+    'target_price': 188.66,
+    'rsi': 45.2,
+    'ma_signal': 'BULLISH'
+}
+notifier.send_prediction_notification(prediction)
+
+# Send trade alert
+notifier.send_trade_alert(
+    ticker='AAPL',
+    action='BUY',
+    price=175.50,
+    quantity=100,
+    reason='High probability weekly gain'
+)
+```
+
+**Methods:**
+- `test_connection()` - Test iMessage setup and send test message
+- `send_prediction_notification(prediction: Dict)` - Send prediction alert
+- `send_trade_alert(ticker, action, price, quantity=None, reason=None)` - Send trade execution alert
+
+**Configuration:**
+Set environment variables or `.env` file:
+- `IMESSAGE_ENABLED=true`
+- `IMESSAGE_APPLE_ID=recipient@example.com` (single recipient, or)
+- `IMESSAGE_PHONE=+12345678900` (single recipient, or)
+- `IMESSAGE_PHONE=+12345678900,+19876543210,+15551234567` (multiple recipients)
+
 ---
 
 ## 🐛 Troubleshooting
 
 ### Common Issues
 
-#### 1. **SSL Certificate Error**
+#### 1. **iMessage Notifications Not Working**
+
+**Symptoms:**
+- No messages received when predictions are made
+- Error: "iMessage error" or "Messages app may not be responding"
+
+**Solutions:**
+
+1. **Check Configuration:**
+   ```bash
+   # Verify environment variables are set
+   echo $IMESSAGE_ENABLED
+   echo $IMESSAGE_APPLE_ID
+   echo $IMESSAGE_PHONE
+   ```
+
+2. **Test Connection:**
+   ```python
+   from utils.imessage_notifier import iMessageNotifier
+   notifier = iMessageNotifier()
+   notifier.test_connection()
+   ```
+
+3. **Verify Messages App:**
+   - Open Messages app on macOS
+   - Sign in with your Apple ID
+   - Ensure iMessage is enabled in Settings
+   - Check that recipient is in your Contacts
+
+4. **Check Recipient Format:**
+   - **Apple ID**: Use full email (e.g., `user@example.com`) - single recipient only
+   - **Phone Number(s)**: Include country code (e.g., `+12345678900` for US)
+   - **Multiple Phone Numbers**: Comma-separated (e.g., `+12345678900,+19876543210`)
+   - All recipients must be in Contacts app
+
+5. **Permissions:**
+   - Grant Terminal/iTerm permission to control Messages app
+   - System Preferences → Security & Privacy → Privacy → Automation
+   - Allow your terminal app to control Messages
+
+6. **Common Errors:**
+   - **"Messages app may not be responding"**: Open Messages app manually first
+   - **"Recipient not found"**: Add recipient to Contacts app
+   - **"Permission denied"**: Grant automation permissions in System Preferences
+
+#### 2. **SSL Certificate Error**
 
 ```
 <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED]>

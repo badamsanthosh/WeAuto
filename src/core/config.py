@@ -77,4 +77,11 @@ APPROVAL_TIMEOUT = 300  # Timeout in seconds for approval
 LOG_LEVEL = 'INFO'
 LOG_FILE = 'trading_log.log'
 
+# iMessage Notification Configuration
+IMESSAGE_ENABLED = os.getenv('IMESSAGE_ENABLED', 'False').lower() == 'true'
+IMESSAGE_APPLE_ID = os.getenv('IMESSAGE_APPLE_ID', '')  # Apple ID (email) for iMessage
+IMESSAGE_PHONE = os.getenv('IMESSAGE_PHONE', '')  # Phone number(s) for iMessage - comma-separated list (e.g., +1234567890,+19876543210)
+# Note: IMESSAGE_PHONE can accept multiple phone numbers separated by commas.
+# Phone numbers take precedence over Apple ID if both are set.
+
 
